@@ -3,9 +3,15 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.tjw.template.ScrollingActivity">
     <item
-            android:id="@+id/action_settings"
-            android:title="Toolbar Menu"
-            android:icon="@drawable/ic_add"
+            android:id="@+id/action_edit"
+            android:title="编辑"
             android:orderInCategory="100"
-            app:showAsAction="never"/>
+            app:showAsAction="always"/>
+
+    <item
+            android:id="@+id/action_settings"
+            android:title="设置"
+            android:orderInCategory="20"
+            app:showAsAction="always"/>
+    
 </menu>

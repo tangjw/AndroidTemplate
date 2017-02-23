@@ -9,12 +9,27 @@
         android:layout_height="match_parent"
         tools:context="com.tjw.template.ScrollingActivity">
 
-
-    <Button
-            android:onClick="goToolbar"
-            android:textAllCaps="false"
-            android:text="@string/btn_toolbar"
+    <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/button"/>
+            android:orientation="vertical"
+            android:layout_height="match_parent">
+
+        <Button
+                android:onClick="goToolbar"
+                android:textAllCaps="false"
+                android:text="@string/btn_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button1"/>
+
+
+        <Button
+                android:onClick="goBottomNav"
+                android:textAllCaps="false"
+                android:text="@string/bottom_nav"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button2"/>
+
+    </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
