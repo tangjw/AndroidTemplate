@@ -5,4 +5,5 @@
     <color name="colorScrollPrimaryDark">#303F9F</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorBottomNav">#F8F8F8</color>
 </resources>
