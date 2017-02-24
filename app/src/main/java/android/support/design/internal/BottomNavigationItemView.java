@@ -87,7 +87,7 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         setBackgroundResource(R.drawable.design_bottom_navigation_item_background);
         mIcon = (ImageView) findViewById(R.id.icon);
         mSmallLabel = (TextView) findViewById(R.id.smallLabel);
-        mSmallLabel.setTextSize(inactiveLabelSize);
+        mSmallLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,(int)(0.8*inactiveLabelSize));
         mLargeLabel = (TextView) findViewById(R.id.largeLabel);
     
         //-------添加小红点------- 
