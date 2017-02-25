@@ -4,15 +4,15 @@
     <item
             android:id="@+id/menu_phone"
             android:checked="true"
-            android:icon="@drawable/ic_phone"
-            android:title="电话"/>
+            android:icon="@drawable/ic_home"
+            android:title="主页"/>
     <item
             android:id="@+id/menu_people"
             android:icon="@drawable/ic_circle"
-            android:title="联系人"/>
+            android:title="发现"/>
     <item
             android:id="@+id/menu_camera"
-            android:icon="@drawable/ic_camera"
-            android:title="照片"/>
+            android:icon="@drawable/ic_mine"
+            android:title="我"/>
 
 </menu>

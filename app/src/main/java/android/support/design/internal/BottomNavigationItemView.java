@@ -19,7 +19,6 @@ package android.support.design.internal;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
@@ -45,7 +44,7 @@ import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 public class BottomNavigationItemView extends FrameLayout implements MenuView.ItemView {
     public static final int INVALID_ITEM_POSITION = -1;
     
-    private static final int[] CHECKED_STATE_SET = { android.R.attr.state_checked };
+    private static final int[] CHECKED_STATE_SET = {android.R.attr.state_checked};
     
     private final int mDefaultMargin;
     private final int mShiftAmount;
@@ -62,6 +61,7 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
     private MenuItemImpl mItemData;
     
     private ColorStateList mIconTint;
+    private ImageView mIvRedPoint;
     
     public BottomNavigationItemView(@NonNull Context context) {
         this(context, null);
@@ -87,38 +87,48 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         setBackgroundResource(R.drawable.design_bottom_navigation_item_background);
         mIcon = (ImageView) findViewById(R.id.icon);
         mSmallLabel = (TextView) findViewById(R.id.smallLabel);
-        mSmallLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,(int)(0.8*inactiveLabelSize));
+        mSmallLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, (int) (0.9 * inactiveLabelSize));
         mLargeLabel = (TextView) findViewById(R.id.largeLabel);
-    
-        //-------添加小红点------- 
         mLargeLabel.setVisibility(GONE);
-        ImageView imageView = new ImageView(context);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        imageView.setImageResource(com.tjw.template.R.drawable.drawable_msg_point);
-    
+        
+        //-------添加小红点------- 
+        mIvRedPoint = new ImageView(context);
+        mIvRedPoint.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        mIvRedPoint.setImageResource(com.tjw.template.R.drawable.drawable_msg_point);
+        
         LayoutParams pointParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         pointParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
         pointParams.topMargin = mDefaultMargin;
-        pointParams.leftMargin = (int) (1.5*mDefaultMargin);
-        imageView.setLayoutParams(pointParams);
-        addView(imageView);
-    
-        LayoutParams pointTextParams = new LayoutParams(48,48);
-        TextView textView = new TextView(context);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
-        textView.setTextColor(Color.WHITE);
-        textView.setGravity(Gravity.CENTER);
-        textView.setBackgroundResource(com.tjw.template.R.drawable.drawable_msg_point);
-        pointTextParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-        pointTextParams.topMargin = (int) (0.75*mDefaultMargin);
-        pointTextParams.leftMargin = (int) (1.8*mDefaultMargin);
-        textView.setLayoutParams(pointTextParams);
-        textView.setText("1");
-    
-        addView(textView);
-    
+        pointParams.leftMargin = (int) (1.5 * mDefaultMargin);
+        mIvRedPoint.setLayoutParams(pointParams);
+        addView(mIvRedPoint);
+
+//        LayoutParams pointTextParams = new LayoutParams(48,48);
+//        TextView textView = new TextView(context);
+//        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+//        textView.setTextColor(Color.WHITE);
+//        textView.setGravity(Gravity.CENTER);
+//        textView.setBackgroundResource(com.tjw.template.R.drawable.drawable_msg_point);
+//        pointTextParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+//        pointTextParams.topMargin = (int) (0.75*mDefaultMargin);
+//        pointTextParams.leftMargin = (int) (1.8*mDefaultMargin);
+//        textView.setLayoutParams(pointTextParams);
+//        textView.setText("1");
+//    
+//        addView(textView);
+        
         //-------添加小红点------- 
         
+        showRedPoint(false);
+        
+    }
+    
+    /**
+     * 是否显示BottomNav 的小红点
+     * @param isShow true显示 false不显示
+     */
+    private void showRedPoint(boolean isShow) {
+        mIvRedPoint.setVisibility(isShow ? VISIBLE : INVISIBLE);
     }
     
     @Override
@@ -165,12 +175,12 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         ViewCompat.setPivotX(mSmallLabel, mSmallLabel.getWidth() / 2);
         ViewCompat.setPivotY(mSmallLabel, mSmallLabel.getBaseline());
         
-            if (checked) {
-                mSmallLabel.setVisibility(VISIBLE);
-            } else {
-                mSmallLabel.setVisibility(VISIBLE);
-                
-            }
+        if (checked) {
+            mSmallLabel.setVisibility(VISIBLE);
+        } else {
+            mSmallLabel.setVisibility(VISIBLE);
+            
+        }
         
         refreshDrawableState();
     }
