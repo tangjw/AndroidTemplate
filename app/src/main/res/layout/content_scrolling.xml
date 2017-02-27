@@ -31,5 +31,13 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/button2"/>
 
+        <Button
+                android:onClick="goRxJava2"
+                android:textAllCaps="false"
+                android:text="RxJava2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button3"/>
+
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

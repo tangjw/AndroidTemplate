@@ -125,9 +125,10 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
     
     /**
      * 是否显示BottomNav 的小红点
+     *
      * @param isShow true显示 false不显示
      */
-    private void showRedPoint(boolean isShow) {
+    public void showRedPoint(boolean isShow) {
         mIvRedPoint.setVisibility(isShow ? VISIBLE : INVISIBLE);
     }
     

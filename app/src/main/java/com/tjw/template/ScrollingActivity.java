@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.tjw.template.bottomnav.BottomNavActivity;
+import com.tjw.template.rxjava2.RxJava2Activity;
 import com.tjw.template.toolbar.ToolbarActivity;
 
 public class ScrollingActivity extends AppCompatActivity {
@@ -36,5 +37,9 @@ public class ScrollingActivity extends AppCompatActivity {
     
     public void goBottomNav(View view) {
         startActivity(new Intent(this, BottomNavActivity.class));
+    }
+    
+    public void goRxJava2(View view) {
+        startActivity(new Intent(this, RxJava2Activity.class));
     }
 }

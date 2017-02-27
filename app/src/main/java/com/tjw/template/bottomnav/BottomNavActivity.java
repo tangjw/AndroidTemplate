@@ -1,6 +1,7 @@
 package com.tjw.template.bottomnav;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.widget.BottomNavigationView;
@@ -38,7 +39,7 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
     private BottomNavigationView mBottomNav;
     private BottomNavigationItemView mMenuPhone;
     private BottomNavigationItemView mMenuPeople;
-    private BottomNavigationItemView mMenuCamera;
+    private BottomNavigationItemView mMenuMine;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +55,11 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         
-        
-        setViewPager();
+        initViewPager();
         
         mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNav);
         
-        setBottomNav();
+        initBottomNav();
         
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -70,12 +70,19 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
             }
         });
         
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mMenuPeople.showRedPoint(true);
+            }
+        }, 5000L);
+        
     }
     
     /**
      * 设置 ViewPager
      */
-    private void setViewPager() {
+    private void initViewPager() {
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
     }
@@ -83,15 +90,11 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
     /**
      * 设置BottomNavigationView
      */
-    private void setBottomNav() {
+    private void initBottomNav() {
         
         mMenuPhone = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_phone);
         mMenuPeople = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_people);
-        mMenuCamera = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_camera);
-        
-//        mMenuPhone.setShiftingMode(false);
-//        mMenuPeople.setShiftingMode(false);
-//        mMenuCamera.setShiftingMode(false);
+        mMenuMine = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_mine);
         
         mBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -103,7 +106,7 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
                     case R.id.menu_people:
                         mViewPager.setCurrentItem(1, false);
                         break;
-                    case R.id.menu_camera:
+                    case R.id.menu_mine:
                         mViewPager.setCurrentItem(2, false);
                         break;
                 }
