@@ -38,6 +38,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.tjw.template.util.DensityUtil;
+
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 @RestrictTo(LIBRARY_GROUP)
@@ -79,6 +81,9 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         int activeLabelSize = res.getDimensionPixelSize(
                 R.dimen.design_bottom_navigation_active_text_size);
         mDefaultMargin = res.getDimensionPixelSize(R.dimen.design_bottom_navigation_margin);
+        System.out.println(
+                "mDefaultMargin: " + mDefaultMargin
+        );
         mShiftAmount = inactiveLabelSize - activeLabelSize;
         mScaleUpFactor = 1f * activeLabelSize / inactiveLabelSize;
         mScaleDownFactor = 1f * inactiveLabelSize / activeLabelSize;
@@ -98,8 +103,8 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         
         LayoutParams pointParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         pointParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-        pointParams.topMargin = mDefaultMargin;
-        pointParams.leftMargin = (int) (1.5 * mDefaultMargin);
+        pointParams.topMargin = DensityUtil.dip2px(context, 7.5f);
+        pointParams.leftMargin = DensityUtil.dip2px(context, 12f);
         mIvRedPoint.setLayoutParams(pointParams);
         addView(mIvRedPoint);
 

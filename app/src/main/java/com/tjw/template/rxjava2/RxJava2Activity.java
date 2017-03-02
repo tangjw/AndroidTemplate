@@ -6,16 +6,29 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.tjw.template.R;
+import com.tjw.template.bean.Repo;
+import com.tjw.template.net.GitHubApi;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * RxJava2 从头学起
@@ -298,8 +311,8 @@ public class RxJava2Activity extends AppCompatActivity {
                         mButton2.setText("RxJava2线程切换(" + integer + ")");
                     }
                 }); */
-        
-       /* OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+    
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
         builder.readTimeout(10L, TimeUnit.SECONDS);
         builder.connectTimeout(15L, TimeUnit.SECONDS);
     
@@ -348,7 +361,7 @@ public class RxJava2Activity extends AppCompatActivity {
                         mTimeMillis4 = System.currentTimeMillis();
                         Log.i("observer", "onComplete() time => " + (mTimeMillis4-mTimeMillis1));
                     }
-                });*/
+                });
         
         
     }

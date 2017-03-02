@@ -74,6 +74,8 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
             @Override
             public void run() {
                 mMenuPeople.showRedPoint(true);
+                mMenuPhone.showRedPoint(true);
+                mMenuMine.showRedPoint(true);
             }
         }, 5000L);
         

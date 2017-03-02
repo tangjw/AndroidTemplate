@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="oval">
+       android:shape="rectangle">
 
-    <solid android:color="#e0483c"/>
+    <!--<solid android:color="#e0483c"/>-->
     <!--<solid android:color="#FFF"/>-->
 
     <!--<stroke android:color="#000"/>-->
@@ -12,9 +11,10 @@
     <!-- 4个角的弧度 -->
     <!--<corners android:radius="30dp" />-->
     <!-- 渐变色 -->
-    <!--    <gradient
-            android:endColor="#FFF"
-            android:startColor="#FFF" />-->
+    <gradient
+        android:angle="90"
+        android:endColor="#F6F6F6"
+        android:startColor="#F8F8F8"/>
     <!-- 距边框的距离 -->
     <!--<padding
         android:bottom="50dp"
@@ -24,8 +24,8 @@
     <!-- 固定颜色,会覆盖渐变色 -->
     <!--<solid android:color="#CCCCCC" />-->
     <!-- 图形边框 -->
-    <size
-        android:width="9dp"
-        android:height="9dp"/>
+    <!--<size-->
+    <!--android:width="9dp"-->
+    <!--android:height="9dp"/>-->
 
 </shape>
