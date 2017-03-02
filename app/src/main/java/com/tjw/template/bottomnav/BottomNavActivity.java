@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -22,14 +21,7 @@ import com.tjw.template.R;
 
 public class BottomNavActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
     
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+    
     private SectionsPagerAdapter mSectionsPagerAdapter;
     
     /**
@@ -60,25 +52,8 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
         mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNav);
         
         initBottomNav();
-        
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
-            }
-        });
-        
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mMenuPeople.showRedPoint(true);
-                mMenuPhone.showRedPoint(true);
-                mMenuMine.showRedPoint(true);
-            }
-        }, 5000L);
-        
+    
+    
     }
     
     /**
@@ -117,6 +92,13 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
                 return true;
             }
         });
+    
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mMenuPeople.showRedPoint(true);
+            }
+        }, 5000L);
         
     }
     

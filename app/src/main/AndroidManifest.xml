@@ -28,9 +28,9 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".bottomnav.BottomNavActivity"
-                android:label="@string/title_activity_main2"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".bottomnav.BottomNavActivity"
+            android:label="@string/title_activity_main2"
+            android:theme="@style/AppTheme.WeChat">
         </activity>
 
         <activity android:name=".rxjava2.RxJava2Activity"/>
