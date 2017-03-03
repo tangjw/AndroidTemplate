@@ -3,8 +3,7 @@ package com.tjw.template.bottomnav;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationItemView;
-import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -18,20 +17,29 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.tjw.template.R;
+import com.tjw.template.widget.bottomnav.BottomNavItemView;
+import com.tjw.template.widget.bottomnav.BottomNavView;
 
 public class BottomNavActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
     
-    
+    /**
+     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * fragments for each of the sections. We use a
+     * {@link FragmentPagerAdapter} derivative, which will keep every
+     * loaded fragment in memory. If this becomes too memory intensive, it
+     * may be best to switch to a
+     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    private BottomNavigationView mBottomNav;
-    private BottomNavigationItemView mMenuPhone;
-    private BottomNavigationItemView mMenuPeople;
-    private BottomNavigationItemView mMenuMine;
+    private BottomNavView mBottomNav;
+    private BottomNavItemView mMenuPhone;
+    private BottomNavItemView mMenuPeople;
+    private BottomNavItemView mMenuMine;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +56,29 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
         mViewPager = (ViewPager) findViewById(R.id.container);
         
         initViewPager();
-        
-        mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNav);
+    
+        mBottomNav = (BottomNavView) findViewById(R.id.bottomNav);
         
         initBottomNav();
-    
-    
+        
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+            }
+        });
+        
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                mMenuPeople.showRedPoint(true);
+//                mMenuPhone.showRedPoint(true);
+//                mMenuMine.showRedPoint(true);
+            }
+        }, 5000L);
+        
     }
     
     /**
@@ -68,12 +93,12 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
      * 设置BottomNavigationView
      */
     private void initBottomNav() {
-        
-        mMenuPhone = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_phone);
-        mMenuPeople = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_people);
-        mMenuMine = (BottomNavigationItemView) mBottomNav.findViewById(R.id.menu_mine);
-        
-        mBottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+    
+        mMenuPhone = (BottomNavItemView) mBottomNav.findViewById(R.id.menu_phone);
+        mMenuPeople = (BottomNavItemView) mBottomNav.findViewById(R.id.menu_people);
+        mMenuMine = (BottomNavItemView) mBottomNav.findViewById(R.id.menu_mine);
+    
+        mBottomNav.setOnNavItemSelectedListener(new BottomNavView.OnNavItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
@@ -92,13 +117,6 @@ public class BottomNavActivity extends AppCompatActivity implements ViewPager.On
                 return true;
             }
         });
-    
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mMenuPeople.showRedPoint(true);
-            }
-        }, 5000L);
         
     }
     
