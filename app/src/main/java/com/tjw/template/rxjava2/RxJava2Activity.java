@@ -342,13 +342,13 @@ public class RxJava2Activity extends AppCompatActivity {
                     @Override
                     public void onSubscribe(Disposable d) {
                         mTimeMillis1 = System.currentTimeMillis();
-                        Log.i("observer", "onSubscribe() time => " + (mTimeMillis1-mTimeMillis0));
+                        Log.i("observer", "onSubscribe() time => " + (mTimeMillis1 - mTimeMillis0));
                     }
                     
                     @Override
                     public void onNext(List<Repo> repos) {
                         mTimeMillis2 = System.currentTimeMillis();
-                        Log.i("observer", "onNext() time => " + (mTimeMillis2-mTimeMillis1));
+                        Log.i("observer", "onNext() time => " + (mTimeMillis2 - mTimeMillis1));
                     }
                     
                     @Override
@@ -359,7 +359,7 @@ public class RxJava2Activity extends AppCompatActivity {
                     @Override
                     public void onComplete() {
                         mTimeMillis4 = System.currentTimeMillis();
-                        Log.i("observer", "onComplete() time => " + (mTimeMillis4-mTimeMillis1));
+                        Log.i("observer", "onComplete() time => " + (mTimeMillis4 - mTimeMillis1));
                     }
                 });
         

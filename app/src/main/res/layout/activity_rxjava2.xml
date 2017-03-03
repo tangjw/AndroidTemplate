@@ -19,4 +19,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/button2"/>
+
+    <Button
+            android:text="RxJava2操作符 map flatMap"
+            android:textAllCaps="false"
+            android:onClick="click3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/button3"/>
+
 </LinearLayout>

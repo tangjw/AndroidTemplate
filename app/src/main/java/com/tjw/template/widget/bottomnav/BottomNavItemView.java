@@ -1,28 +1,10 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package android.support.design.internal;
+package com.tjw.template.widget.bottomnav;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
-import android.support.design.R;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.PointerIconCompat;
@@ -40,24 +22,13 @@ import android.widget.TextView;
 
 import com.tjw.template.util.DensityUtil;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
-
-@RestrictTo(LIBRARY_GROUP)
-public class BottomNavigationItemView extends FrameLayout implements MenuView.ItemView {
+public class BottomNavItemView extends FrameLayout implements MenuView.ItemView {
     public static final int INVALID_ITEM_POSITION = -1;
     
     private static final int[] CHECKED_STATE_SET = {android.R.attr.state_checked};
     
-    private final int mDefaultMargin;
-    private final int mShiftAmount;
-    private final float mScaleUpFactor;
-    private final float mScaleDownFactor;
-    
-    private boolean mShiftingMode;
-    
     private ImageView mIcon;
     private final TextView mSmallLabel;
-    private final TextView mLargeLabel;
     private int mItemPosition = INVALID_ITEM_POSITION;
     
     private MenuItemImpl mItemData;
@@ -65,36 +36,23 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
     private ColorStateList mIconTint;
     private ImageView mIvRedPoint;
     
-    public BottomNavigationItemView(@NonNull Context context) {
+    public BottomNavItemView(@NonNull Context context) {
         this(context, null);
     }
     
-    public BottomNavigationItemView(@NonNull Context context, AttributeSet attrs) {
+    public BottomNavItemView(@NonNull Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
     
-    public BottomNavigationItemView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BottomNavItemView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         final Resources res = getResources();
-        int inactiveLabelSize =
-                res.getDimensionPixelSize(R.dimen.design_bottom_navigation_text_size);
-        int activeLabelSize = res.getDimensionPixelSize(
-                R.dimen.design_bottom_navigation_active_text_size);
-        mDefaultMargin = res.getDimensionPixelSize(R.dimen.design_bottom_navigation_margin);
-        System.out.println(
-                "mDefaultMargin: " + mDefaultMargin
-        );
-        mShiftAmount = inactiveLabelSize - activeLabelSize;
-        mScaleUpFactor = 1f * activeLabelSize / inactiveLabelSize;
-        mScaleDownFactor = 1f * inactiveLabelSize / activeLabelSize;
-        
-        LayoutInflater.from(context).inflate(R.layout.design_bottom_navigation_item, this, true);
-        setBackgroundResource(R.drawable.design_bottom_navigation_item_background);
-        mIcon = (ImageView) findViewById(R.id.icon);
-        mSmallLabel = (TextView) findViewById(R.id.smallLabel);
+        int inactiveLabelSize = res.getDimensionPixelSize(android.support.design.R.dimen.design_bottom_navigation_text_size);
+        LayoutInflater.from(context).inflate(android.support.design.R.layout.design_bottom_navigation_item, this, true);
+        setBackgroundResource(android.support.design.R.drawable.design_bottom_navigation_item_background);
+        mIcon = (ImageView) findViewById(android.support.design.R.id.icon);
+        mSmallLabel = (TextView) findViewById(android.support.design.R.id.smallLabel);
         mSmallLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, (int) (0.9 * inactiveLabelSize));
-        mLargeLabel = (TextView) findViewById(R.id.largeLabel);
-        mLargeLabel.setVisibility(GONE);
         
         //-------添加小红点------- 
         mIvRedPoint = new ImageView(context);
@@ -156,11 +114,6 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
         return mItemPosition;
     }
     
-    public void setShiftingMode(boolean enabled) {
-        mShiftingMode = enabled;
-        mShiftingMode = false;
-    }
-    
     @Override
     public MenuItemImpl getItemData() {
         return mItemData;
@@ -178,15 +131,15 @@ public class BottomNavigationItemView extends FrameLayout implements MenuView.It
     
     @Override
     public void setChecked(boolean checked) {
-        ViewCompat.setPivotX(mSmallLabel, mSmallLabel.getWidth() / 2);
-        ViewCompat.setPivotY(mSmallLabel, mSmallLabel.getBaseline());
-        
-        if (checked) {
-            mSmallLabel.setVisibility(VISIBLE);
-        } else {
-            mSmallLabel.setVisibility(VISIBLE);
-            
-        }
+//        ViewCompat.setPivotX(mSmallLabel, mSmallLabel.getWidth() / 2);
+//        ViewCompat.setPivotY(mSmallLabel, mSmallLabel.getBaseline());
+//        
+//        if (checked) {
+//            mSmallLabel.setVisibility(VISIBLE);
+//        } else {
+//            mSmallLabel.setVisibility(VISIBLE);
+//            
+//        }
         
         refreshDrawableState();
     }

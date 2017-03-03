@@ -5,7 +5,8 @@
     <color name="colorScrollPrimaryDark">#303F9F</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorBottomNav">#F8F8F8</color>
+    <color name="colorBottomNav">#F5F8F8F8</color>
     <color name="colorThemeSelect">#51aa38</color>
     <color name="colorTextGray">#929292</color>
+    <color name="colorDivider">#CCCCCC</color>
 </resources>
