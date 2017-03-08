@@ -2,30 +2,31 @@ package com.tjw.template.toolbar;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.tjw.template.R;
+import com.tjw.template.swipeback.BaseActivity;
+import com.tjw.template.util.ActivityStackUtils;
 
 /**
  * ToolbarActivity
  */
-public class ToolbarActivity extends AppCompatActivity {
+public class ToolbarActivity extends BaseActivity {
     
     private Toolbar mToolbar;
     
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void initView(Bundle savedInstanceState) {
         setContentView(R.layout.activity_toolbar);
-        
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        
+    
         //若完全使用 toolbar menu api, 注释掉即可 
 //        setSupportActionBar(mToolbar);
-        
+    
+        ActivityStackUtils.getInstance().showAllActivity();
+    
         setToolbar();
     }
     
