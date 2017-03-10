@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.orhanobut.logger.Logger;
+
 /**
  * ^-^
  * Created by tang-jw on 3/2.
@@ -23,6 +25,7 @@ public abstract class BaseFragment extends Fragment {
     protected boolean isVisibleToUser;
     protected View mRootView;
     
+    
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -36,16 +39,26 @@ public abstract class BaseFragment extends Fragment {
         
         mRootView = inflater.inflate(getFraLayout(), container, false);
         
-        initData(getArguments());
+        if (getArguments() != null) {
+            initData(getArguments());
+        } else {
+            Logger.e("getArguments == null, initData() not work");
+        }
         
         initView();
         
         initListener();
         
+        loadData();
+        
         isPrepare = true;
         
         return mRootView;
     }
+    
+    protected void loadData() {
+    }
+    
     
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {

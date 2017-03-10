@@ -41,8 +41,12 @@ public abstract class BaseActivity extends AppCompatActivity
         
         initView(savedInstanceState);
         setListener();
+    
+        loadData();
         
     }
+    
+    protected void loadData(){}
     
     protected void beforeSuperOnCreate() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -70,6 +74,7 @@ public abstract class BaseActivity extends AppCompatActivity
         mSwipeBackHelper.setIsNeedShowShadow(true);
         // 设置阴影区域的透明度是否根据滑动的距离渐变。默认值为 true
         mSwipeBackHelper.setIsShadowAlphaGradient(true);
+        mSwipeBackHelper.setIsOnlyTrackingLeftEdge(false);
     }
     
     @Override
