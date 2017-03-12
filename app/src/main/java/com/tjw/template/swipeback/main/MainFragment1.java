@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.orhanobut.logger.Logger;
 import com.tjw.template.R;
 import com.tjw.template.bean.Repo;
 import com.tjw.template.bottomnav.BaseFragment;
 import com.tjw.template.net.GitHubApi;
 import com.tjw.template.swipeback.main.adapter.Main1RecyclerViewAdapter;
+import com.tjw.template.widget.banner.SimpleHeaderView;
 import com.tjw.template.widget.recycler.DividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainFragment1 extends BaseFragment {
     
     private RecyclerView mRecyclerView;
+    private Main1RecyclerViewAdapter mAdapter;
     
     public MainFragment1() {
         // Required empty public constructor
@@ -60,13 +64,19 @@ public class MainFragment1 extends BaseFragment {
     protected void initView() {
         mRecyclerView = (RecyclerView) mRootView.findViewById(R.id.rv_main_1);
         initRecyclerView();
+        mAdapter = new Main1RecyclerViewAdapter(mActivity, new ArrayList<Repo>());
+        SimpleHeaderView simpleHeaderView = new SimpleHeaderView(mActivity);
+        mAdapter.setHeaderView(simpleHeaderView);
+        mRecyclerView.setAdapter(mAdapter);
+        
     }
+    
     
     private void initRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         
     }
     
@@ -99,8 +109,10 @@ public class MainFragment1 extends BaseFragment {
                     
                     @Override
                     public void onNext(List<Repo> repos) {
-                        mRecyclerView.setAdapter(new Main1RecyclerViewAdapter(mActivity, repos));
-                        mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
+                        Logger.d(repos.get(0).getArchive_url());
+    
+                        mAdapter.setDataList(repos);
+                        
                     }
                     
                     @Override

@@ -1,5 +1,6 @@
 package com.tjw.template.widget.bottomnav;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.support.annotation.DrawableRes;
@@ -48,13 +49,19 @@ public class BottomNavView extends FrameLayout {
         this(context, attrs, 0);
     }
     
+    @SuppressLint("PrivateResource")
     public BottomNavView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        
         
         // Create the menu
         mMenu = new BottomNavigationMenu(context);
         
         mMenuView = new BottomNavMenuView(context);
+        
+        if (isInEditMode()) {
+            return;
+        }
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.CENTER;

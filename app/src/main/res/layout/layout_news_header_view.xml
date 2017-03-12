@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:background="#FFF"
+                android:minHeight="130dp">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_banner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/drawable_bg_banner_indicator"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="#FFF"
+            android:visibility="gone"/>
+
+        <com.tjw.template.widget.indicator.CirclePagerIndicator
+            android:id="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:circle_indicator_centerHorizontal="true"
+            app:circle_indicator_color="#FFF"
+            app:circle_indicator_fill_color="#00F"
+            app:circle_indicator_indicator_radius="3dp"
+            app:circle_indicator_radius="2dp"/>
+    </LinearLayout>
+</RelativeLayout>

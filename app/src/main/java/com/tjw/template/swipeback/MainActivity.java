@@ -1,14 +1,11 @@
 package com.tjw.template.swipeback;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -17,7 +14,6 @@ import com.tjw.template.bottomnav.BaseFragment;
 import com.tjw.template.swipeback.main.MainFragment1;
 import com.tjw.template.swipeback.main.MainFragment2;
 import com.tjw.template.swipeback.main.MainFragment3;
-import com.tjw.template.toolbar.ToolbarActivity;
 import com.tjw.template.widget.bottomnav.BottomNavItemView;
 import com.tjw.template.widget.bottomnav.BottomNavView;
 
@@ -28,7 +24,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         ViewPager.OnPageChangeListener, BottomNavView.OnNavItemSelectedListener{
     
     private BottomNavView mBottomNav;
-    private FloatingActionButton mFab;
     private ViewPager mViewPager;
     
     private BottomNavItemView mMenuPhone;
@@ -38,21 +33,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     
     @Override
     protected void beforeSuperOnCreate() {
-        
+        super.beforeSuperOnCreate();
     }
     
     
     @Override
     protected void initView(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
-        
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    
+    
         mViewPager = (ViewPager) findViewById(R.id.container);
         initViewPager();
         mBottomNav = (BottomNavView) findViewById(R.id.bottomNav);
         initBottomNav();
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
     }
     
     private void initBottomNav() {
@@ -74,7 +67,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     
     @Override
     protected void setListener() {
-        mFab.setOnClickListener(this);
     }
     
     @Override
@@ -84,11 +76,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fab:
-                startActivity(new Intent(this, ToolbarActivity.class));
-                break;
-        }
+    
     }
     
     @Override
