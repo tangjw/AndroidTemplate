@@ -1,5 +1,6 @@
 package com.tjw.template.widget.bottomnav;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -44,6 +45,7 @@ public class BottomNavItemView extends FrameLayout implements MenuView.ItemView 
         this(context, attrs, 0);
     }
     
+    @SuppressLint("PrivateResource")
     public BottomNavItemView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         final Resources res = getResources();

@@ -34,7 +34,6 @@ public class CirclePagerIndicator extends View implements PagerIndicator {
     public CirclePagerIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
         
-        
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CirclePagerIndicator);
         
         mCenterHorizontal = a.getBoolean(R.styleable.CirclePagerIndicator_circle_indicator_centerHorizontal, true);
@@ -55,7 +54,6 @@ public class CirclePagerIndicator extends View implements PagerIndicator {
     
     @Override
     protected void onDraw(Canvas canvas) {
-        
         super.onDraw(canvas);
         
         if (mViewPager == null) {

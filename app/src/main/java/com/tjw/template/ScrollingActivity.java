@@ -16,6 +16,8 @@ import com.tjw.template.toolbar.ToolbarActivity;
 
 public class ScrollingActivity extends AppCompatActivity {
     
+    private boolean mFlag;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +36,8 @@ public class ScrollingActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                fullScreen(mFlag);
+                mFlag = !mFlag;
             }
         });
     }
@@ -48,5 +52,24 @@ public class ScrollingActivity extends AppCompatActivity {
     
     public void goRxJava2(View view) {
         startActivity(new Intent(this, RxJava2Activity.class));
+    }
+    
+    /**
+     * 动态全屏 隐藏状态栏
+     *
+     * @param enable
+     */
+    private void fullScreen(boolean enable) {
+        if (enable) {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            getWindow().setAttributes(lp);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            WindowManager.LayoutParams attr = getWindow().getAttributes();
+            attr.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setAttributes(attr);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
     }
 }
