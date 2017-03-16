@@ -74,6 +74,7 @@ public class MainFragment2 extends BaseFragment {
         });
         mXRecyclerView.setEmptyView(viewById);
         
+        
         mXRecyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
             public void onRefresh() {

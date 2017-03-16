@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.tjw.template.R;
-import com.tjw.template.ScrollingActivity;
 import com.tjw.template.bean.Repo;
+import com.tjw.template.camera.CameraActivity;
 import com.tjw.template.widget.banner.HeaderView;
 
 import java.util.List;
@@ -63,7 +63,7 @@ public class Main1RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
         inflate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mActivity.startActivity(new Intent(mActivity, ScrollingActivity.class));
+                mActivity.startActivity(new Intent(mActivity, CameraActivity.class));
             
             }
         });
@@ -75,7 +75,6 @@ public class Main1RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
     
         if (getItemViewType(position) == TYPE_HEADER) {
-            System.out.println("TYPE_HEADER");
             return;
         }
         Repo repo = mDataList.get(position - 1);
@@ -96,7 +95,6 @@ public class Main1RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
     @Override
     public int getItemViewType(int position) {
         if (mHeaderView != null && position == 0) {
-            System.out.println("getItemViewType --- TYPE_HEADER");
             return TYPE_HEADER;
         }
         return TYPE_NORMAL;

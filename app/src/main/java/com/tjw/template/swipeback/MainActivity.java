@@ -32,12 +32,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     private List<BaseFragment> mMainFragments;
     
     @Override
-    protected void beforeSuperOnCreate() {
-        super.beforeSuperOnCreate();
-    }
-    
-    
-    @Override
     protected void initView(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
     

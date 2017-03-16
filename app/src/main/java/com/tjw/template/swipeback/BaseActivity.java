@@ -32,14 +32,15 @@ public abstract class BaseActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         // 在 super.onCreate(savedInstanceState) 之前调用该方法
         initSwipeBackFinish();
-    
-        beforeSuperOnCreate();
-        
         super.onCreate(savedInstanceState);
+        
         // 将BaseActivity 添加到栈管理
         ActivityStackUtils.getInstance().addActivity(this);
         
+        beforeSetLayout();
+        
         initView(savedInstanceState);
+        
         setListener();
     
         loadData();
@@ -48,7 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity
     
     protected void loadData(){}
     
-    protected void beforeSuperOnCreate() {
+    protected void beforeSetLayout() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

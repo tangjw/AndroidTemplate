@@ -3,6 +3,9 @@
           package="com.tjw.template">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    
 
     <application
         android:name=".TemplateApp"
@@ -13,8 +16,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".swipeback.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -39,6 +42,11 @@
         </activity>
 
         <activity android:name=".rxjava2.RxJava2Activity"/>
+        <activity
+            android:name=".camera.CameraActivity"
+            android:theme="@style/AppTheme.SwipeBack"
+            android:screenOrientation="portrait"
+            />
     </application>
 
 </manifest>

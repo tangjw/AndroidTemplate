@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:gravity="center_horizontal"
+              android:background="#FFF"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        android:layout_height="48dp">
+        
+    </android.support.v7.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:background="@color/colorAccent"
+        android:layout_width="120dp"
+        android:padding="1px"
+        android:layout_height="120dp"
+        android:layout_marginTop="90dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_mine"/>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_marginTop="30dp"
+        android:layout_width="90dp"
+        android:onClick="openCamera"
+        android:textAllCaps="false"
+        android:layout_height="wrap_content"
+        android:text="拍照"/>
+
+    <Button
+        android:id="@+id/button4"
+        android:textAllCaps="false"
+        android:layout_marginTop="10dp"
+        android:layout_width="90dp"
+        android:onClick="openAlbum"
+        android:layout_height="wrap_content"
+        android:text="相册"/>
+    
+</LinearLayout>
