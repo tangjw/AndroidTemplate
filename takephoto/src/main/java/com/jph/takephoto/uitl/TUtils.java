@@ -12,8 +12,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.darsh.multipleimageselect.models.Image;
 import com.jph.takephoto.R;
+import com.jph.takephoto.album.models.Image;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.TContextWrap;
 import com.jph.takephoto.model.TException;

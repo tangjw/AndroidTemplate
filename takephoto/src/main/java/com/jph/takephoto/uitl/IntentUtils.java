@@ -5,8 +5,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
-import com.darsh.multipleimageselect.activities.AlbumSelectActivity;
-import com.darsh.multipleimageselect.helpers.Constants;
+
+import com.jph.takephoto.album.activities.AlbumSelectActivity;
+import com.jph.takephoto.album.helpers.Constants;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.TContextWrap;
 

@@ -32,8 +32,6 @@ import java.io.File;
 
 public class CameraActivity extends BaseActivity implements TakePhoto.TakeResultListener, InvokeListener {
     
-    private static final int TAKE_PHOTO = 201;
-    private static final int TAKE_ALBUM = 202;
     private ImageView mImageView;
     
     private InvokeParam mInvokeParam;
@@ -74,12 +72,12 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     public void openCamera(View view) {
         File file = new File(Environment.getExternalStorageDirectory(), "/temp/" + System.currentTimeMillis() + ".jpg");
         Uri imageUri = Uri.fromFile(file);
-        mTakePhoto.onPickFromCaptureWithCrop(imageUri,getCropOptions());
-       
+        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
+        
     }
     
     public void openAlbum(View view) {
-        mTakePhoto.onPickMultipleWithCrop(1,getCropOptions());
+        mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
     }
     
     @Override
@@ -114,8 +112,6 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     
     /**
      * 获取TakePhoto实例
-     *
-     * @return
      */
     public TakePhoto getTakePhoto() {
         if (mTakePhoto == null) {
@@ -124,8 +120,11 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
         return mTakePhoto;
     }
     
-    private CropOptions getCropOptions(){
-        CropOptions.Builder builder=new CropOptions.Builder();
+    /**
+     * 剪切图片的设置参数
+     */
+    private CropOptions getCropOptions() {
+        CropOptions.Builder builder = new CropOptions.Builder();
         builder.setOutputX(600).setOutputY(600);
         builder.setAspectX(1).setAspectY(1);
         builder.setWithOwnCrop(false);
