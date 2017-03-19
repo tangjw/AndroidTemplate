@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoImpl;
+import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.InvokeParam;
 import com.jph.takephoto.model.TContextWrap;
@@ -72,8 +73,19 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     public void openCamera(View view) {
         File file = new File(Environment.getExternalStorageDirectory(), "/temp/" + System.currentTimeMillis() + ".jpg");
         Uri imageUri = Uri.fromFile(file);
-        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
+//        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
+        setCompress();
+        mTakePhoto.onPickFromCapture(imageUri);
         
+    }
+    
+    private void setCompress() {
+        CompressConfig compressConfig = new CompressConfig.Builder()
+                .setMaxSize(2 * 1024 * 1024)
+                .setMaxPixel(2016)
+                .create();
+        compressConfig.enableReserveRaw(true);
+        mTakePhoto.onEnableCompress(compressConfig, true);
     }
     
     public void openAlbum(View view) {
@@ -82,8 +94,6 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     
     @Override
     public void takeSuccess(TResult result) {
-        
-        System.out.println("takeSuccess: " + result.getImages().get(0).getOriginalPath());
         
         Bitmap bitmap = BitmapFactory.decodeFile(result.getImages().get(0).getOriginalPath());
         mImageView.setImageBitmap(bitmap);

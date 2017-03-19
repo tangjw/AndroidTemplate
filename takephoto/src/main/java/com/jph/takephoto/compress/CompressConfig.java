@@ -33,7 +33,7 @@ public class CompressConfig implements Serializable {
     /**
      * 是否保留原文件
      */
-    private boolean enableReserveRaw = false;
+    private boolean enableReserveRaw = true;
 
     /**
      * Luban压缩配置
@@ -87,6 +87,7 @@ public class CompressConfig implements Serializable {
     public boolean isEnableReserveRaw() {
         return enableReserveRaw;
     }
+    
     public void enableReserveRaw(boolean enableReserveRaw) {
         this.enableReserveRaw = enableReserveRaw;
     }

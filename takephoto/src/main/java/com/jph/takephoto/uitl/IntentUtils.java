@@ -52,10 +52,6 @@ public class IntentUtils {
             intent.putExtra("outputX", options.getOutputX());
             intent.putExtra("outputY", options.getOutputY());
         }
-//        intent.putExtra("aspectX", 1);
-//        intent.putExtra("aspectY", 1);
-//        intent.putExtra("outputX", 600);
-//        intent.putExtra("outputY", 600);
         
         intent.putExtra("scale", true);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outPutUri);
