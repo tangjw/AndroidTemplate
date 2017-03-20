@@ -447,8 +447,6 @@ public class ImageSelectActivity extends HelperActivity {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 2017/3/20 取消所有并返回 
-                
                 unselectAll();
                 finish();
             }
