@@ -7,7 +7,8 @@
 
     <application
         android:allowBackup="true">
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity"/>
+        <activity 
+            android:name="com.soundcloud.android.crop.CropImageActivity"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -28,7 +29,7 @@
         </activity>
         <activity
             android:name=".album.activities.ImageSelectActivity"
-            android:theme="@style/MultipleImageSelectTheme"
+            android:theme="@style/MultiImageSelectTheme"
             android:configChanges="orientation|screenSize">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>

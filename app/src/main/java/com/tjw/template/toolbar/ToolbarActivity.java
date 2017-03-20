@@ -3,6 +3,8 @@ package com.tjw.template.toolbar;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -30,13 +32,13 @@ public class ToolbarActivity extends BaseActivity {
         setToolbar();
     }
     
-    /*@Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // TODO Auto-generated method stub
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_toolbar, menu);
         return super.onCreateOptionsMenu(menu);
-    }*/
+    }
     
     
     /**

@@ -40,10 +40,13 @@ public class HelperActivity extends AppCompatActivity {
             showRequestPermissionRationale();
             
         } else {
-            showAppPermissionSettings();
+//            showAppPermissionSettings();
         }
     }
     
+    /**
+     * 重新获取权限 unused
+     */
     private void showRequestPermissionRationale() {
         Snackbar snackbar = Snackbar.make(
                 view,

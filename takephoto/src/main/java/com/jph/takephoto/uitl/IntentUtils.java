@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.jph.takephoto.album.activities.AlbumSelectActivity;
+import com.jph.takephoto.album.activities.ImageSelectActivity;
 import com.jph.takephoto.album.helpers.Constants;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.TContextWrap;
@@ -25,8 +25,13 @@ public class IntentUtils {
      * @param limit 最多选择图片张数的限制
      * */
     public static Intent getPickMultipleIntent(TContextWrap contextWrap, int limit){
-        Intent intent = new Intent(contextWrap.getActivity(), AlbumSelectActivity.class);
+//        Intent intent = new Intent(contextWrap.getActivity(), AlbumSelectActivity.class);
+//        intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit>0? limit:1);
+    
+    
+        Intent intent = new Intent(contextWrap.getActivity(), ImageSelectActivity.class);
         intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit>0? limit:1);
+//        startActivityForResult(intent, Constants.REQUEST_CODE);
         return intent;
     }
 

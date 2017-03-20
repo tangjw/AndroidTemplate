@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_select_done"
+        android:title="完成"
+        android:orderInCategory="100"
+        app:showAsAction="always"/>
+
+   <!-- <item
+        android:id="@+id/action_settings"
+        android:title="设置"
+        android:orderInCategory="20"
+        app:showAsAction="always"/>
+-->
+</menu>

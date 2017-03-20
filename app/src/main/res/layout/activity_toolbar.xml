@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="#FFF"
-    
     android:theme="@style/AppTheme.AppBarOverlay"
     tools:context="com.tjw.template.toolbar.ToolbarActivity">
 

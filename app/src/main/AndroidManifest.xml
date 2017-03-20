@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".swipeback.MainActivity"
-            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -26,27 +26,32 @@
         </activity>
         <activity
             android:name=".ScrollingActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_scrolling"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
         <activity
             android:name=".toolbar.ToolbarActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.SwipeBack">
         </activity>
         <activity
             android:name=".bottomnav.BottomNavActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_main2"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
 
-        <activity android:name=".rxjava2.RxJava2Activity"/>
+        <activity android:name=".rxjava2.RxJava2Activity"
+                  android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity
             android:name=".camera.CameraActivity"
+           
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.SwipeBack"
-            android:screenOrientation="portrait"
-            />
+            /> <!--android:hardwareAccelerated="false"-->
     </application>
 
 </manifest>

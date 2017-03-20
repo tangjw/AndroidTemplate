@@ -26,5 +26,5 @@ public class Constants {
     public static final int DEFAULT_LIMIT = 9;
     
     //Maximum number of images that can be selected at a time
-    public static int limit;
+    public static int limit = 0;
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,7 +15,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,9 +35,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/**
- * Created by Darshan on 4/18/2015.
- */
 public class ImageSelectActivity extends HelperActivity {
     private ArrayList<Image> images;
     private String album;
@@ -48,40 +45,42 @@ public class ImageSelectActivity extends HelperActivity {
     private GridView gridView;
     private CustomImageSelectAdapter adapter;
     
-    private ActionBar actionBar;
-    
-    private ActionMode actionMode;
     private int countSelected;
     
     private ContentObserver observer;
     private Handler handler;
     private Thread thread;
     
-    private final String[] projection = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATA};
+    private final String[] projection = new String[]{
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATA};
+    
+    private Toolbar mToolbar;
+    private MenuItem mActionSelectDone;
+    private TextView mTvPreview;
+    private TextView mTvAlbum;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_select);
-        setView(findViewById(R.id.layout_image_select));
+
+//        setView(findViewById(R.id.layout_image_select));
         
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mTvPreview = (TextView) findViewById(R.id.tv_preview);
         
-        actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
-            
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle(R.string.image_view);
-        }
+        mTvAlbum = (TextView) findViewById(R.id.tv_select_album);
+        
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        
+        setToolbar();
+        
         
         Intent intent = getIntent();
-        if (intent == null) {
-            finish();
-            return;
-        }
+        Constants.limit = intent.getIntExtra(Constants.INTENT_EXTRA_LIMIT, 0);
+        
         album = intent.getStringExtra(Constants.INTENT_EXTRA_ALBUM);
         
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
@@ -92,15 +91,7 @@ public class ImageSelectActivity extends HelperActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (actionMode == null) {
-                    actionMode = ImageSelectActivity.this.startActionMode(callback);
-                }
                 toggleSelection(position);
-                actionMode.setTitle(countSelected + " " + getString(R.string.selected));
-                
-                if (countSelected == 0) {
-                    actionMode.finish();
-                }
             }
         });
     }
@@ -141,14 +132,6 @@ public class ImageSelectActivity extends HelperActivity {
                             
                         } else {
                             adapter.notifyDataSetChanged();
-                            /*
-                            Some selected images may have been deleted
-                            hence update action mode title
-                             */
-                            if (actionMode != null) {
-                                countSelected = msg.arg1;
-                                actionMode.setTitle(countSelected + " " + getString(R.string.selected));
-                            }
                         }
                         break;
                     }
@@ -195,9 +178,6 @@ public class ImageSelectActivity extends HelperActivity {
     protected void onDestroy() {
         super.onDestroy();
         
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(null);
-        }
         images = null;
         if (adapter != null) {
             adapter.releaseResources();
@@ -224,56 +204,30 @@ public class ImageSelectActivity extends HelperActivity {
     }
     
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                onBackPressed();
-                return true;
-            }
-            
-            default: {
-                return false;
-            }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (Constants.limit > 1) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_select_toolbar, menu);
+            mActionSelectDone = menu.getItem(0);
         }
+        return super.onCreateOptionsMenu(menu);
     }
     
-    private ActionMode.Callback callback = new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater menuInflater = mode.getMenuInflater();
-            menuInflater.inflate(R.menu.menu_contextual_action_bar, menu);
-            
-            actionMode = mode;
-            countSelected = 0;
-            
-            return true;
-        }
-        
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-        
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            int i = item.getItemId();
-            if (i == R.id.menu_item_add_image) {
-                sendIntent();
-                return true;
-            }
-            return false;
-        }
-        
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            if (countSelected > 0) {
-                deselectAll();
-            }
-            actionMode = null;
-        }
-    };
     
     private void toggleSelection(int position) {
+        
+        if (1 == Constants.limit) {
+            images.get(position).isSelected = !images.get(position).isSelected;
+            if (images.get(position).isSelected) {
+                countSelected++;
+            } else {
+                countSelected--;
+            }
+            sendIntent();
+            return;
+        }
+        
+        
         if (!images.get(position).isSelected && countSelected >= Constants.limit) {
             Toast.makeText(
                     getApplicationContext(),
@@ -290,9 +244,25 @@ public class ImageSelectActivity extends HelperActivity {
             countSelected--;
         }
         adapter.notifyDataSetChanged();
+        
+        if (countSelected < 1) {
+            mActionSelectDone.setTitle("完成");
+        } else {
+            mActionSelectDone.setTitle("完成(" + countSelected + "/" + Constants.limit + ")");
+        }
+        
+        if (countSelected >= 1) {
+            mTvPreview.setTextColor(Color.WHITE);
+            mTvPreview.setText("预览(" + countSelected + ")");
+          
+        } else {
+            mTvPreview.setTextColor(getResources().getColor(R.color.colorTextGray));
+            mTvPreview.setText("预览");
+        }
+        
     }
     
-    private void deselectAll() {
+    private void unselectAll() {
         for (int i = 0, l = images.size(); i < l; i++) {
             images.get(i).isSelected = false;
         }
@@ -446,4 +416,63 @@ public class ImageSelectActivity extends HelperActivity {
         progressBar.setVisibility(View.INVISIBLE);
         gridView.setVisibility(View.INVISIBLE);
     }
+    
+    
+    //-------------------------- 修改--------------------------
+    
+    /**
+     * 设置Toolbar的 相关api
+     */
+    private void setToolbar() {
+        
+        ActionBar actionBar = getSupportActionBar();
+        
+        if (actionBar != null) {
+            // 显示 title 默认为 true ,设为 false Toolbar上的 title才会显示
+            actionBar.setDisplayShowTitleEnabled(false);
+            // 显示返回箭头 ← 默认不显示
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+//        mToolbar.setLogo(R.mipmap.ic_launcher);
+        
+        mToolbar.setTitle("所有图片");
+
+//        mToolbar.setSubtitle("我是小标题");
+        
+        // 设置返回键图标
+//        mToolbar.setNavigationIcon(R.drawable.ic_back);
+        
+        mToolbar.setContentInsetStartWithNavigation(0);
+        
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: 2017/3/20 取消所有并返回 
+                
+                unselectAll();
+                finish();
+            }
+        });
+
+//        mToolbar.inflateMenu(R.menu.menu_toolbar);
+
+//        mToolbar.setOverflowIcon(getResources().getDrawable(R.drawable.ic_add));
+        
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.action_select_done) {
+                    if (countSelected > 0) {
+                        sendIntent();
+                    } else {
+                        finish();
+                    }
+                }
+                
+                return true;
+            }
+        });
+    }
+    
+    
 }

@@ -1,8 +1,6 @@
 package com.tjw.template.camera;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoImpl;
 import com.jph.takephoto.compress.CompressConfig;
@@ -18,6 +17,7 @@ import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.InvokeParam;
 import com.jph.takephoto.model.TContextWrap;
 import com.jph.takephoto.model.TResult;
+import com.jph.takephoto.model.TakePhotoOptions;
 import com.jph.takephoto.permission.InvokeListener;
 import com.jph.takephoto.permission.PermissionManager;
 import com.jph.takephoto.permission.TakePhotoInvocationHandler;
@@ -75,29 +75,37 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
         Uri imageUri = Uri.fromFile(file);
 //        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
         setCompress();
+        setPhotoOption();
         mTakePhoto.onPickFromCapture(imageUri);
         
     }
     
     private void setCompress() {
-        CompressConfig compressConfig = new CompressConfig.Builder()
-                .setMaxSize(2 * 1024 * 1024)
-                .setMaxPixel(2016)
-                .create();
+        CompressConfig compressConfig = new CompressConfig.Builder().create();
         compressConfig.enableReserveRaw(true);
-        mTakePhoto.onEnableCompress(compressConfig, true);
+        mTakePhoto.onEnableCompress(compressConfig, false);
+    }
+    
+    private void setPhotoOption() {
+        TakePhotoOptions.Builder builder=new TakePhotoOptions.Builder();
+        //设置纠正照片方向
+        builder.setCorrectImage(true);
+        mTakePhoto.setTakePhotoOptions(builder.create());
     }
     
     public void openAlbum(View view) {
-        mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
+        setCompress();
+        setPhotoOption();
+        mTakePhoto.onPickMultiple(9);
+//        mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
     }
     
     @Override
     public void takeSuccess(TResult result) {
         
-        Bitmap bitmap = BitmapFactory.decodeFile(result.getImages().get(0).getOriginalPath());
-        mImageView.setImageBitmap(bitmap);
-        
+        Glide.with(this)
+                .load(result.getImages().get(0).getOriginalPath())
+                .into(mImageView);
         
     }
     
