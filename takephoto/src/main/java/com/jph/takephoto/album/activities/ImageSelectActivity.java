@@ -78,6 +78,7 @@ public class ImageSelectActivity extends HelperActivity {
     private ListPopupWindow mListPopupWindow;
     private String allName;
     private int mCurrentSelectedAlbum;
+    private ArrayList<Long> mSelectImages;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +97,8 @@ public class ImageSelectActivity extends HelperActivity {
     
     
         setToolbar();
+    
+        mSelectImages = new ArrayList<>();
         
         
         Intent intent = getIntent();
@@ -210,7 +213,7 @@ public class ImageSelectActivity extends HelperActivity {
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
-    
+                        ArrayList<Image> selected = getSelected();
                         if (adapter == null) {
                             adapter = new CustomImageSelectAdapter(getApplicationContext(), images);
                             gridView.setAdapter(adapter);
@@ -329,7 +332,9 @@ public class ImageSelectActivity extends HelperActivity {
         images.get(position).isSelected = !images.get(position).isSelected;
         if (images.get(position).isSelected) {
             countSelected++;
+            mSelectImages.add(images.get(position).id);
         } else {
+            mSelectImages.remove(images.get(position).id);
             countSelected--;
         }
         adapter.notifyDataSetChanged();
@@ -436,15 +441,16 @@ public class ImageSelectActivity extends HelperActivity {
                     
                     long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
                     String name = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    if (TextUtils.isEmpty(album)) {
-                        allName = name;
-                    }
                     String path = cursor.getString(cursor.getColumnIndex(projection[2]));
                     boolean isSelected = selectedImages.contains(id);
                     if (isSelected) {
                         tempCountSelected++;
                     }
-                    
+                    if (mSelectImages.contains(id)) {
+                        isSelected = true;
+                    } else {
+                        isSelected = false;
+                    } 
                     file = new File(path);
                     if (file.exists()) {
                         temp.add(new Image(id, name, path, isSelected));
