@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jph.takephoto.R;
+import com.jph.takephoto.album.ImagePreviewFragment;
 import com.jph.takephoto.album.adapters.AlbumSelectAdapter;
 import com.jph.takephoto.album.adapters.CustomImageSelectAdapter;
 import com.jph.takephoto.album.helpers.Constants;
@@ -92,8 +93,8 @@ public class ImageSelectActivity extends HelperActivity {
         mBottomToolBar = (RelativeLayout) findViewById(R.id.rl_select_album);
         
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
-        
+    
+    
         setToolbar();
         
         
@@ -155,6 +156,17 @@ public class ImageSelectActivity extends HelperActivity {
                 }
                 loadImages();
                 
+            }
+        });
+    
+        mTvPreview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<Image> selected = getSelected();
+                if (selected != null && selected.size() > 0) {
+                    ImagePreviewFragment.newInstance(selected).show(getSupportFragmentManager(), "preview");
+                }
+            
             }
         });
     }
@@ -596,6 +608,7 @@ public class ImageSelectActivity extends HelperActivity {
      * 设置Toolbar的 相关api
      */
     private void setToolbar() {
+        setSupportActionBar(mToolbar);
         
         ActionBar actionBar = getSupportActionBar();
         

@@ -7,8 +7,9 @@
 
     <application
         android:allowBackup="true">
-        <activity 
-            android:name="com.soundcloud.android.crop.CropImageActivity"/>
+        <activity
+            android:name="com.soundcloud.android.crop.CropImageActivity"
+            android:configChanges="orientation|screenSize"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -21,19 +22,19 @@
 
         <activity
             android:name=".album.activities.AlbumSelectActivity"
-            android:theme="@style/MultipleImageSelectTheme"
-            android:configChanges="orientation|screenSize">
-            <intent-filter>
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/MultipleImageSelectTheme">
+            <!--<intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+            </intent-filter>-->
         </activity>
         <activity
             android:name=".album.activities.ImageSelectActivity"
-            android:theme="@style/MultiImageSelectTheme"
-            android:configChanges="orientation|screenSize">
-            <intent-filter>
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/MultiImageSelectTheme">
+            <!--<intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+            </intent-filter>-->
         </activity>
 
     </application>
