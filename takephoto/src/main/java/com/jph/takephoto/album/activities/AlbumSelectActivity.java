@@ -88,7 +88,7 @@ public class AlbumSelectActivity extends HelperActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), ImageSelectActivity.class);
-                intent.putExtra(Constants.INTENT_EXTRA_ALBUM, albums.get(position).name);
+                intent.putExtra(Constants.INTENT_EXTRA_ALBUM, albums.get(position).getName());
                 startActivityForResult(intent, Constants.REQUEST_CODE);
             }
         });
@@ -115,6 +115,7 @@ public class AlbumSelectActivity extends HelperActivity {
                     
                     case Constants.FETCH_COMPLETED: {
                         if (adapter == null) {
+                            System.out.println("****" + albums.size());
                             adapter = new CustomAlbumSelectAdapter(getApplicationContext(), albums);
                             gridView.setAdapter(adapter);
                             
@@ -274,7 +275,7 @@ public class AlbumSelectActivity extends HelperActivity {
                          */
                         file = new File(image);
                         if (file.exists()) {
-                            temp.add(new Album(album, image));
+                            temp.add(new Album(album, image, 10));
                             albumSet.add(albumId);
                         }
                     }

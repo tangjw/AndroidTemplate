@@ -31,7 +31,6 @@ public class IntentUtils {
     
         Intent intent = new Intent(contextWrap.getActivity(), ImageSelectActivity.class);
         intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit>0? limit:1);
-//        startActivityForResult(intent, Constants.REQUEST_CODE);
         return intent;
     }
 

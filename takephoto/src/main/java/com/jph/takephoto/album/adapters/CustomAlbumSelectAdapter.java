@@ -39,10 +39,10 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
         
         viewHolder.imageView.getLayoutParams().width = size;
         viewHolder.imageView.getLayoutParams().height = size;
-        
-        viewHolder.textView.setText(arrayList.get(position).name);
+    
+        viewHolder.textView.setText(arrayList.get(position).getName());
         Glide.with(context)
-                .load(arrayList.get(position).cover)
+                .load(arrayList.get(position).getCover())
                 .placeholder(R.drawable.image_placeholder).centerCrop().into(viewHolder.imageView);
         
         return convertView;

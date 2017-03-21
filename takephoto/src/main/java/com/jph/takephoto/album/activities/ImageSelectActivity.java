@@ -12,6 +12,7 @@ import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -23,12 +24,15 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jph.takephoto.R;
+import com.jph.takephoto.album.adapters.AlbumSelectAdapter;
 import com.jph.takephoto.album.adapters.CustomImageSelectAdapter;
 import com.jph.takephoto.album.helpers.Constants;
+import com.jph.takephoto.album.models.Album;
 import com.jph.takephoto.album.models.Image;
 
 import java.io.File;
@@ -39,27 +43,40 @@ public class ImageSelectActivity extends HelperActivity {
     private ArrayList<Image> images;
     private String album;
     
+    private ArrayList<Album> albums;
+    
     private TextView errorDisplay;
     
     private ProgressBar progressBar;
     private GridView gridView;
     private CustomImageSelectAdapter adapter;
+    private AlbumSelectAdapter mAlbumSelectAdapter;
     
     private int countSelected;
     
     private ContentObserver observer;
     private Handler handler;
     private Thread thread;
+    private Thread thread2;
     
     private final String[] projection = new String[]{
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DISPLAY_NAME,
             MediaStore.Images.Media.DATA};
     
+    private final String[] projection2 = new String[]{
+            MediaStore.Images.Media.BUCKET_ID,
+            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.Media.DATA};
+    
     private Toolbar mToolbar;
     private MenuItem mActionSelectDone;
     private TextView mTvPreview;
     private TextView mTvAlbum;
+    private RelativeLayout mBottomToolBar;
+    private ListPopupWindow mListPopupWindow;
+    private String allName;
+    private int mCurrentSelectedAlbum;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +88,8 @@ public class ImageSelectActivity extends HelperActivity {
         mTvPreview = (TextView) findViewById(R.id.tv_preview);
         
         mTvAlbum = (TextView) findViewById(R.id.tv_select_album);
+    
+        mBottomToolBar = (RelativeLayout) findViewById(R.id.rl_select_album);
         
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -94,6 +113,50 @@ public class ImageSelectActivity extends HelperActivity {
                 toggleSelection(position);
             }
         });
+    
+        setClickListener();
+    }
+    
+    private void setClickListener() {
+        
+        mListPopupWindow = new ListPopupWindow(ImageSelectActivity.this);
+        mListPopupWindow.setAnchorView(mBottomToolBar);
+        mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
+        mListPopupWindow.setHeight(ListPopupWindow.WRAP_CONTENT);
+        mListPopupWindow.setModal(true);
+        
+        mTvAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (albums != null && albums.size() > 0) {
+                    mListPopupWindow.show();
+                }
+            }
+        });
+        
+        mListPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+                mCurrentSelectedAlbum = position;
+                
+                for (int i = 0; i < albums.size(); i++) {
+                    albums.get(i).setSelected(i == position);
+                }
+                mAlbumSelectAdapter.notifyDataSetChanged();
+                mListPopupWindow.dismiss();
+                if (position != 0) {
+                    
+                    album = albums.get(position).getName();
+                    mToolbar.setTitle(album);
+                } else {
+                    album = null;
+                    mToolbar.setTitle("所有图片");
+                }
+                loadImages();
+                
+            }
+        });
     }
     
     @Override
@@ -105,23 +168,37 @@ public class ImageSelectActivity extends HelperActivity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case Constants.PERMISSION_GRANTED: {
+                        System.out.println("加载相册加载 图片");
+                        loadAlbums();
                         loadImages();
                         break;
                     }
                     
                     case Constants.FETCH_STARTED: {
-                        progressBar.setVisibility(View.VISIBLE);
-                        gridView.setVisibility(View.INVISIBLE);
+//                        progressBar.setVisibility(View.VISIBLE);
+//                        gridView.setVisibility(View.INVISIBLE);
+                        break;
+                    }
+                    case Constants.ALBUM_FETCH_COMPLETED: {
+                        albums.get(mCurrentSelectedAlbum).setSelected(true);
+                        if (mAlbumSelectAdapter == null) {
+                            mAlbumSelectAdapter = new AlbumSelectAdapter(albums);
+                            mListPopupWindow.setAdapter(mAlbumSelectAdapter);
+                        } else {
+                            mAlbumSelectAdapter.notifyDataSetChanged();
+                        }
                         break;
                     }
                     
                     case Constants.FETCH_COMPLETED: {
+                        
                         /*
                         If adapter is null, this implies that the loaded images will be shown
                         for the first time, hence send FETCH_COMPLETED message.
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
+    
                         if (adapter == null) {
                             adapter = new CustomImageSelectAdapter(getApplicationContext(), images);
                             gridView.setAdapter(adapter);
@@ -129,7 +206,6 @@ public class ImageSelectActivity extends HelperActivity {
                             progressBar.setVisibility(View.INVISIBLE);
                             gridView.setVisibility(View.VISIBLE);
                             orientationBasedUI(getResources().getConfiguration().orientation);
-                            
                         } else {
                             adapter.notifyDataSetChanged();
                         }
@@ -151,6 +227,7 @@ public class ImageSelectActivity extends HelperActivity {
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
+                loadAlbums();
                 loadImages();
             }
         };
@@ -254,7 +331,7 @@ public class ImageSelectActivity extends HelperActivity {
         if (countSelected >= 1) {
             mTvPreview.setTextColor(Color.WHITE);
             mTvPreview.setText("预览(" + countSelected + ")");
-          
+    
         } else {
             mTvPreview.setTextColor(getResources().getColor(R.color.colorTextGray));
             mTvPreview.setText("预览");
@@ -347,6 +424,9 @@ public class ImageSelectActivity extends HelperActivity {
                     
                     long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
                     String name = cursor.getString(cursor.getColumnIndex(projection[1]));
+                    if (TextUtils.isEmpty(album)) {
+                        allName = name;
+                    }
                     String path = cursor.getString(cursor.getColumnIndex(projection[2]));
                     boolean isSelected = selectedImages.contains(id);
                     if (isSelected) {
@@ -378,6 +458,85 @@ public class ImageSelectActivity extends HelperActivity {
         thread.start();
     }
     
+    private void startThread2(Runnable runnable) {
+        stopThread2();
+        thread2 = new Thread(runnable);
+        thread2.start();
+    }
+    
+    
+    private void loadAlbums() {
+        startThread2(new AlbumLoaderRunnable());
+    }
+    
+    private class AlbumLoaderRunnable implements Runnable {
+        @Override
+        public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            
+            if (mAlbumSelectAdapter == null) {
+                sendMessage(Constants.ALBUM_FETCH_STARTED);
+            }
+            
+            Cursor cursor = getApplicationContext().getContentResolver()
+                    .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection2,
+                            null, null, MediaStore.Images.Media.DATE_ADDED);
+            if (cursor == null) {
+                sendMessage(Constants.ERROR);
+                return;
+            }
+            
+            
+            ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
+            HashSet<Long> albumSet = new HashSet<>();
+            File file;
+            if (cursor.moveToLast()) {
+                do {
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                    
+                    long albumId = cursor.getLong(cursor.getColumnIndex(projection2[0]));
+                    String album = cursor.getString(cursor.getColumnIndex(projection2[1]));
+                    String image = cursor.getString(cursor.getColumnIndex(projection2[2]));
+                    
+                    
+                    int count = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                            MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED).getCount();
+                    
+                    if (!albumSet.contains(albumId)) {
+                        /*
+                        It may happen that some image file paths are still present in cache,
+                        though image file does not exist. These last as long as media
+                        scanner is not run again. To avoid get such image file paths, check
+                        if image file exists.
+                         */
+                        file = new File(image);
+                        if (file.exists()) {
+                            temp.add(new Album(album, image, count));
+                            albumSet.add(albumId);
+                        }
+                    }
+                    
+                } while (cursor.moveToPrevious());
+            }
+            Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
+            
+            cursor.close();
+            
+            if (albums == null) {
+                albums = new ArrayList<>();
+            }
+            albums.clear();
+//            albums.add(all);
+            albums.add(allalbum);
+            
+            albums.addAll(temp);
+            
+            sendMessage(Constants.ALBUM_FETCH_COMPLETED);
+        }
+    }
+    
     private void stopThread() {
         if (thread == null || !thread.isAlive()) {
             return;
@@ -386,6 +545,19 @@ public class ImageSelectActivity extends HelperActivity {
         thread.interrupt();
         try {
             thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void stopThread2() {
+        if (thread2 == null || !thread2.isAlive()) {
+            return;
+        }
+        
+        thread2.interrupt();
+        try {
+            thread2.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
