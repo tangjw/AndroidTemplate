@@ -213,7 +213,7 @@ public class ImageSelectActivity extends HelperActivity {
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
-                        ArrayList<Image> selected = getSelected();
+
                         if (adapter == null) {
                             adapter = new CustomImageSelectAdapter(getApplicationContext(), images);
                             gridView.setAdapter(adapter);
@@ -256,6 +256,7 @@ public class ImageSelectActivity extends HelperActivity {
         super.onStop();
         
         stopThread();
+        stopThread2();
         
         getContentResolver().unregisterContentObserver(observer);
         observer = null;

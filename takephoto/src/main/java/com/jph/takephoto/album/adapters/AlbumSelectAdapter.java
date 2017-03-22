@@ -9,6 +9,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.jph.takephoto.R;
 import com.jph.takephoto.album.models.Album;
 
@@ -67,10 +68,18 @@ public class AlbumSelectAdapter extends BaseAdapter {
         viewHolder.textView.setText(albums.get(position).getName());
         viewHolder.textView1.setText(albums.get(position).getCount() + "张");
         viewHolder.radioButton.setChecked(albums.get(position).isSelected());
-        Glide.with(parent.getContext())
-                .load(albums.get(position).getCover())
-                .placeholder(R.drawable.image_placeholder).centerCrop().into(viewHolder.imageView);
-        
+    
+        if (albums.get(position).getCover().endsWith(".gif") || albums.get(position).getCover().contains(".gif")) {
+            Glide.with(parent.getContext())
+                    .load(albums.get(position).getCover())
+                    .centerCrop()
+                    .into(new GlideDrawableImageViewTarget(viewHolder.imageView, 0));
+        } else {
+            Glide.with(parent.getContext())
+                    .load(albums.get(position).getCover())
+                    .centerCrop()
+                    .into(viewHolder.imageView);
+        }
         
         return convertView;
     }

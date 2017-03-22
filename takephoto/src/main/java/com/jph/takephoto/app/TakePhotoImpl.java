@@ -179,6 +179,8 @@ public class TakePhotoImpl implements TakePhoto {
                 }
                 break;
             case TConstant.RC_PICK_PICTURE_FROM_CAPTURE://拍取照片
+                System.out.println("拍照");
+                System.out.println(resultCode);
                 if (resultCode == Activity.RESULT_OK) {
                     if(takePhotoOptions!=null&&takePhotoOptions.isCorrectImage())ImageRotateUtil.of().correctImage(contextWrap.getActivity(), outPutUri);
                     try {

@@ -71,7 +71,10 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     }
     
     public void openCamera(View view) {
-        File file = new File(Environment.getExternalStorageDirectory(), "/temp/" + System.currentTimeMillis() + ".jpg");
+        File file = new File(Environment.getExternalStorageDirectory() + "/temp/" + System.currentTimeMillis() + ".jpg");
+//        if (!file.exists()) {
+//            file.mkdirs();
+//        }
         Uri imageUri = Uri.fromFile(file);
 //        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
         setCompress();

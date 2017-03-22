@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.jph.takephoto.R;
 import com.jph.takephoto.album.models.Image;
 
@@ -51,10 +52,19 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
             viewHolder.view.setAlpha(0.0f);
             ((FrameLayout) convertView).setForeground(null);
         }
-        
-        Glide.with(context)
-                .load(arrayList.get(position).path)
-                .placeholder(R.drawable.image_placeholder).into(viewHolder.imageView);
+    
+        if (arrayList.get(position).path.endsWith(".gif") || arrayList.get(position).path.contains(".gif")) {
+            System.out.println("gif ------");
+            Glide.with(context)
+                    .load(arrayList.get(position).path)
+//                    .asGif()
+                    .placeholder(R.drawable.image_placeholder)
+                    .into(new GlideDrawableImageViewTarget(viewHolder.imageView, 0));
+        } else {
+            Glide.with(context)
+                    .load(arrayList.get(position).path)
+                    .placeholder(R.drawable.image_placeholder).into(viewHolder.imageView);
+        }
         
         return convertView;
     }
