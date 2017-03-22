@@ -38,6 +38,7 @@ import com.jph.takephoto.album.models.Image;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class ImageSelectActivity extends HelperActivity {
@@ -76,7 +77,6 @@ public class ImageSelectActivity extends HelperActivity {
     private TextView mTvAlbum;
     private RelativeLayout mBottomToolBar;
     private ListPopupWindow mListPopupWindow;
-    private String allName;
     private int mCurrentSelectedAlbum;
     private ArrayList<Long> mSelectImages;
     
@@ -169,7 +169,7 @@ public class ImageSelectActivity extends HelperActivity {
                 if (selected != null && selected.size() > 0) {
                     ImagePreviewFragment.newInstance(selected).show(getSupportFragmentManager(), "preview");
                 }
-            
+    
             }
         });
     }
@@ -213,7 +213,7 @@ public class ImageSelectActivity extends HelperActivity {
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
-
+    
                         if (adapter == null) {
                             adapter = new CustomImageSelectAdapter(getApplicationContext(), images);
                             gridView.setAdapter(adapter);
@@ -230,6 +230,11 @@ public class ImageSelectActivity extends HelperActivity {
                     case Constants.ERROR: {
                         progressBar.setVisibility(View.INVISIBLE);
                         errorDisplay.setVisibility(View.VISIBLE);
+                        break;
+                    }
+                    case Constants.EMPTY: {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        Toast.makeText(ImageSelectActivity.this, "没有图片", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     
@@ -437,6 +442,7 @@ public class ImageSelectActivity extends HelperActivity {
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
+                        cursor.close();
                         return;
                     }
                     
@@ -447,11 +453,7 @@ public class ImageSelectActivity extends HelperActivity {
                     if (isSelected) {
                         tempCountSelected++;
                     }
-                    if (mSelectImages.contains(id)) {
-                        isSelected = true;
-                    } else {
-                        isSelected = false;
-                    } 
+                    isSelected = mSelectImages.contains(id);
                     file = new File(path);
                     if (file.exists()) {
                         temp.add(new Image(id, name, path, isSelected));
@@ -496,8 +498,8 @@ public class ImageSelectActivity extends HelperActivity {
             if (mAlbumSelectAdapter == null) {
                 sendMessage(Constants.ALBUM_FETCH_STARTED);
             }
-            
-            Cursor cursor = getApplicationContext().getContentResolver()
+    
+            Cursor cursor = getContentResolver()
                     .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection2,
                             null, null, MediaStore.Images.Media.DATE_ADDED);
             if (cursor == null) {
@@ -507,37 +509,66 @@ public class ImageSelectActivity extends HelperActivity {
             
             
             ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
-            HashSet<Long> albumSet = new HashSet<>();
+//            HashSet<Long> albumSet = new HashSet<>();
+    
+            HashMap<Long, Integer> albumMap = new HashMap<>();
+            
             File file;
+            int i = 0;
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
+                        cursor.close();
                         return;
                     }
                     
                     long albumId = cursor.getLong(cursor.getColumnIndex(projection2[0]));
                     String album = cursor.getString(cursor.getColumnIndex(projection2[1]));
                     String image = cursor.getString(cursor.getColumnIndex(projection2[2]));
+    
+    
+                    /*Cursor cursor1 = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                            MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
+                    if (cursor1 == null) {
+                        sendMessage(Constants.ERROR);
+                        return;
+                    }
                     
+                    int count = cursor1.getCount();
                     
-                    int count = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                            MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED).getCount();
+                    cursor1.close();*/
+    
+                    if (!albumMap.containsKey(albumId)) {
+                        file = new File(image);
+                        if (file.exists()) {
+                            temp.add(new Album(album, image, 1));
+                            albumMap.put(albumId, i++);
+                        }
+                    } else {
+                        Album album1 = temp.get(albumMap.get(albumId));
+                        album1.setCount(album1.getCount() + 1);
+                    }
                     
-                    if (!albumSet.contains(albumId)) {
-                        /*
+                    /*if (!albumSet.contains(albumId)) {
+                        *//*
                         It may happen that some image file paths are still present in cache,
                         though image file does not exist. These last as long as media
                         scanner is not run again. To avoid get such image file paths, check
                         if image file exists.
-                         */
+                         *//*
                         file = new File(image);
                         if (file.exists()) {
-                            temp.add(new Album(album, image, count));
+                            temp.add(new Album(album, image, 1));
                             albumSet.add(albumId);
                         }
-                    }
+                    }*/
                     
                 } while (cursor.moveToPrevious());
+            }
+            if (temp.size() == 0) {
+                sendMessage(Constants.EMPTY);
+                cursor.close();
+                return;
             }
             Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
             

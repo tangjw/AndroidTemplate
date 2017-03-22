@@ -15,6 +15,7 @@ public class Constants {
     public static final int FETCH_COMPLETED = 2002;
     public static final int ALBUM_FETCH_COMPLETED = 2003;
     public static final int ERROR = 2005;
+    public static final int EMPTY = 2006;
     
     /**
      * Request code for permission has to be < (1 << 8)

@@ -1,6 +1,5 @@
 package com.jph.takephoto.album;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,7 +35,6 @@ public class ImagePreviewFragment extends DialogFragment {
     private ArrayList<Image> mImages;
     private Toolbar mToolbar;
     private AppCompatActivity mAppCompatActivity;
-    private Dialog mDialog;
     private View mPaddingLayout;
     private Window mDialogWindow;
     
