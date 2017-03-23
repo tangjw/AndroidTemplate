@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
@@ -365,7 +366,19 @@ public class TakePhotoImpl implements TakePhoto {
     }
     
     @Override
-    public void onPickFromCapture(Uri outPutUri) {
+    public void onPickFromCapture() {
+        File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
+        if (!path.exists()) {
+            path.mkdirs();
+        }
+        File file = new File(path, System.currentTimeMillis() + ".jpg");
+    
+        // 某国产手机不支持
+//        File file2 = new File(Environment.getExternalStorageDirectory() + "/temp/" + ".jpg");
+    
+    
+        Uri outPutUri = Uri.fromFile(file);
+        
         this.fromType = TImage.FromType.CAMERA;
         
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) return;
@@ -385,11 +398,23 @@ public class TakePhotoImpl implements TakePhoto {
     }
     
     @Override
-    public void onPickFromCaptureWithCrop(Uri outPutUri, CropOptions options) {
+    public void onPickFromCaptureWithCrop(CropOptions options) {
         this.fromType = TImage.FromType.CAMERA;
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) return;
         this.cropOptions = options;
-        this.outPutUri = outPutUri;
+    
+        File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
+        if (!path.exists()) {
+            path.mkdirs();
+        }
+        File file = new File(path, System.currentTimeMillis() + ".jpg");
+    
+        // 某国产手机不支持
+//        File file2 = new File(Environment.getExternalStorageDirectory() + "/temp/" + ".jpg");
+    
+    
+        this.outPutUri = Uri.fromFile(file);
+        
         if (Build.VERSION.SDK_INT >= 23) {
             this.tempUri = TUriParse.getTempUri(contextWrap.getActivity());
         } else {

@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
+import android.support.v4.util.LongSparseArray;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +44,7 @@ import java.util.HashSet;
 
 public class ImageSelectActivity extends HelperActivity {
     private ArrayList<Image> images;
+    private LongSparseArray<Image> allImages;
     private String album;
     
     private ArrayList<Album> albums;
@@ -95,9 +97,8 @@ public class ImageSelectActivity extends HelperActivity {
         
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
     
-    
         setToolbar();
-    
+        allImages = new LongSparseArray<>();
         mSelectImages = new ArrayList<>();
         
         
@@ -333,8 +334,10 @@ public class ImageSelectActivity extends HelperActivity {
                     .show();
             return;
         }
-        
+    
+    
         images.get(position).isSelected = !images.get(position).isSelected;
+        allImages.put(images.get(position).id, images.get(position));
         if (images.get(position).isSelected) {
             countSelected++;
             mSelectImages.add(images.get(position).id);
@@ -343,22 +346,23 @@ public class ImageSelectActivity extends HelperActivity {
             countSelected--;
         }
         adapter.notifyDataSetChanged();
-        
-        if (countSelected < 1) {
-            mActionSelectDone.setTitle("完成");
-        } else {
-            mActionSelectDone.setTitle("完成(" + countSelected + "/" + Constants.limit + ")");
-        }
-        
+    
+        setActionText();
+    
+    }
+    
+    
+    private void setActionText() {
         if (countSelected >= 1) {
             mTvPreview.setTextColor(Color.WHITE);
             mTvPreview.setText("预览(" + countSelected + ")");
-    
+            mActionSelectDone.setTitle("完成(" + countSelected + "/" + Constants.limit + ")");
+            
         } else {
+            mActionSelectDone.setTitle("完成");
             mTvPreview.setTextColor(getResources().getColor(R.color.colorTextGray));
             mTvPreview.setText("预览");
         }
-        
     }
     
     private void unselectAll() {
@@ -369,13 +373,42 @@ public class ImageSelectActivity extends HelperActivity {
         adapter.notifyDataSetChanged();
     }
     
+    public void unselectId(long id, boolean isChecked) {
+        allImages.get(id).isSelected = isChecked;
+        
+        if (isChecked) {
+            countSelected++;
+            mSelectImages.add(id);
+        } else {
+            mSelectImages.remove(id);
+            countSelected--;
+        }
+        
+        for (Image image : images) {
+            if (image.id == id) {
+                image.isSelected = isChecked;
+            }
+        }
+        setActionText();
+        adapter.notifyDataSetChanged();
+    }
+    
     private ArrayList<Image> getSelected() {
+//        mSelectImages
         ArrayList<Image> selectedImages = new ArrayList<>();
-        for (int i = 0, l = images.size(); i < l; i++) {
+        /*for (int i = 0, l = images.size(); i < l; i++) {
             if (images.get(i).isSelected) {
                 selectedImages.add(images.get(i));
             }
+        }*/
+        System.out.println(allImages.size());
+        for (int i = 0, nsize = allImages.size(); i < nsize; i++) {
+            Image obj = allImages.valueAt(i);
+            if (obj.isSelected) {
+                selectedImages.add(obj);
+            }
         }
+    
         return selectedImages;
     }
     
@@ -387,6 +420,7 @@ public class ImageSelectActivity extends HelperActivity {
     }
     
     private void loadImages() {
+    
         startThread(new ImageLoaderRunnable());
     }
     
@@ -415,11 +449,14 @@ public class ImageSelectActivity extends HelperActivity {
                     }
                 }
             }
-            
+    
+    
             Cursor cursor;
-            if (TextUtils.isEmpty(album)) {
+            boolean isAllAlbum = TextUtils.isEmpty(album);
+            if (isAllAlbum) {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Images.Media.DATE_ADDED);
+        
             } else {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
@@ -455,19 +492,25 @@ public class ImageSelectActivity extends HelperActivity {
                     isSelected = mSelectImages.contains(id);
                     file = new File(path);
                     if (file.exists()) {
-                        temp.add(new Image(id, name, path, isSelected));
+                        Image image = new Image(id, name, path, isSelected);
+                        temp.add(image);
+                        allImages.put(id, image);
+                        
                     }
                     
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
-            
+    
+            System.out.println("---" + allImages.size());
+    
             if (images == null) {
                 images = new ArrayList<>();
             }
             images.clear();
             images.addAll(temp);
-            
+    
+    
             sendMessage(Constants.FETCH_COMPLETED, tempCountSelected);
         }
     }

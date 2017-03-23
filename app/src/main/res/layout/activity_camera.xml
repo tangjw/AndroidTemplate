@@ -19,7 +19,7 @@
         android:layout_width="120dp"
         android:padding="1px"
         android:layout_height="120dp"
-        android:layout_marginTop="90dp"
+        android:layout_marginTop="30dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_mine"/>
 
@@ -40,5 +40,23 @@
         android:onClick="openAlbum"
         android:layout_height="wrap_content"
         android:text="相册"/>
+
+    <Button
+        android:id="@+id/button6"
+        android:textAllCaps="false"
+        android:layout_marginTop="10dp"
+        android:layout_width="90dp"
+        android:onClick="open1"
+        android:layout_height="wrap_content"
+        android:text="拍照不剪裁"/>
+
+    <Button
+        android:id="@+id/button7"
+        android:textAllCaps="false"
+        android:layout_marginTop="10dp"
+        android:layout_width="90dp"
+        android:onClick="open2"
+        android:layout_height="wrap_content"
+        android:text="相册多选"/>
     
 </LinearLayout>

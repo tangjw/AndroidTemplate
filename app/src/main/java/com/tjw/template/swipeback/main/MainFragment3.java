@@ -1,10 +1,13 @@
 
 package com.tjw.template.swipeback.main;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.tjw.template.R;
 import com.tjw.template.bottomnav.BaseFragment;
+import com.tjw.template.camera.CameraActivity;
 
 /**
  * ^-^
@@ -29,5 +32,16 @@ public class MainFragment3 extends BaseFragment {
     @Override
     protected int getFraLayout() {
         return R.layout.fragment_main_3;
+    }
+    
+    @Override
+    protected void initView() {
+        mRootView.findViewById(R.id.button5).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, CameraActivity.class));
+                
+            }
+        });
     }
 }

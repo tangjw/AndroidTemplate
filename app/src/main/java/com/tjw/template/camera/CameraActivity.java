@@ -1,9 +1,7 @@
 package com.tjw.template.camera;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -16,6 +14,7 @@ import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.InvokeParam;
 import com.jph.takephoto.model.TContextWrap;
+import com.jph.takephoto.model.TImage;
 import com.jph.takephoto.model.TResult;
 import com.jph.takephoto.model.TakePhotoOptions;
 import com.jph.takephoto.permission.InvokeListener;
@@ -24,8 +23,6 @@ import com.jph.takephoto.permission.TakePhotoInvocationHandler;
 import com.orhanobut.logger.Logger;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseActivity;
-
-import java.io.File;
 
 /**
  * ^-^
@@ -73,7 +70,7 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     
     public void openCamera(View view) {
         // new File 正确姿势
-        File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
+        /*File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
         if (!path.exists()) {
             path.mkdirs();
         }
@@ -83,11 +80,11 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
 //        File file2 = new File(Environment.getExternalStorageDirectory() + "/temp/" + ".jpg");
         
         
-        Uri imageUri = Uri.fromFile(file);
+        Uri imageUri = Uri.fromFile(file);*/
         setCompress();
         setPhotoOption();
 //        mTakePhoto.onPickFromCapture(imageUri);
-        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
+        mTakePhoto.onPickFromCaptureWithCrop(getCropOptions());
         
     }
     
@@ -117,9 +114,13 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
         Glide.with(this)
                 .load(result.getImages().get(0).getOriginalPath())
                 .into(mImageView);
+
+//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+//                Uri.parse("file://" + result.getImages().get(0).getOriginalPath())));
     
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                Uri.parse("file://" + result.getImages().get(0).getOriginalPath())));
+        for (TImage img : result.getImages()) {
+            System.out.println(img.getOriginalPath());
+        }
         
     }
     
@@ -163,4 +164,11 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
         return builder.create();
     }
     
+    public void open1(View view) {
+        mTakePhoto.onPickFromCapture();
+    }
+    
+    public void open2(View view) {
+        mTakePhoto.onPickMultiple(9);
+    }
 }

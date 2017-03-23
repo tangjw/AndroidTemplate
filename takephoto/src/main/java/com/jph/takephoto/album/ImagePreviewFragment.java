@@ -1,5 +1,6 @@
 package com.jph.takephoto.album;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -7,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,12 +16,15 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.jph.takephoto.R;
+import com.jph.takephoto.album.activities.ImageSelectActivity;
 import com.jph.takephoto.album.models.Image;
 import com.jph.takephoto.album.widget.ZoomOutPageTransformer;
 import com.jph.takephoto.photoview.OnPhotoTapListener;
@@ -34,9 +37,10 @@ public class ImagePreviewFragment extends DialogFragment {
     private ViewPager mViewPager;
     private ArrayList<Image> mImages;
     private Toolbar mToolbar;
-    private AppCompatActivity mAppCompatActivity;
+    private CheckBox mCbSelect;
     private View mPaddingLayout;
     private Window mDialogWindow;
+    private ImageSelectActivity mActivity;
     
     public static ImagePreviewFragment newInstance(@NonNull ArrayList<Image> images) {
         
@@ -63,7 +67,14 @@ public class ImagePreviewFragment extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mAppCompatActivity = (AppCompatActivity) context;
+    
+        if (context instanceof ImageSelectActivity) {
+            mActivity = (ImageSelectActivity) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " can not cast to ImageSelectActivity");
+        }
+        
     }
     
     @Override
@@ -71,6 +82,7 @@ public class ImagePreviewFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_preview_image, container, false);
         mViewPager = (ViewPager) view.findViewById(R.id.vp_images);
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        mCbSelect = (CheckBox) view.findViewById(R.id.cb_select);
         mPaddingLayout = view.findViewById(R.id.paddinglayout);
         setToolbar();
         return view;
@@ -79,19 +91,30 @@ public class ImagePreviewFragment extends DialogFragment {
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
-        final BrowseAdapter adapter = new BrowseAdapter();
+        BrowseAdapter adapter = new BrowseAdapter();
         
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             
             @Override
             public void onPageSelected(int position) {
                 mToolbar.setTitle(position + 1 + "/" + mImages.size());
+                mCbSelect.setChecked(mImages.get(position).isSelected);
             }
             
         });
         mViewPager.setAdapter(adapter);
-        
-        
+    
+        mCbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            
+                mImages.get(mViewPager.getCurrentItem()).isSelected = isChecked;
+            
+                if (mActivity != null) {
+                    mActivity.unselectId(mImages.get(mViewPager.getCurrentItem()).id, isChecked);
+                }
+            }
+        });
     }
     
     @Override
@@ -122,11 +145,11 @@ public class ImagePreviewFragment extends DialogFragment {
     
             if (mImages.get(position).path.endsWith(".gif") || mImages.get(position).path.contains(".gif")) {
         
-                Glide.with(mAppCompatActivity)
+                Glide.with(context)
                         .load(mImages.get(position).path)
                         .into(new GlideDrawableImageViewTarget(image, 0));
             } else {
-                Glide.with(mAppCompatActivity)
+                Glide.with(context)
                         .load(mImages.get(position).path)
                         .into(image);
             }
@@ -148,8 +171,9 @@ public class ImagePreviewFragment extends DialogFragment {
         }
     }
     
+    @SuppressLint("PrivateResource")
     private void setToolbar() {
-    
+        
         mToolbar.setTitle("1/" + mImages.size());
         
         
@@ -186,26 +210,30 @@ public class ImagePreviewFragment extends DialogFragment {
     
     public void tabFullscreen() {
         if (mPaddingLayout.getVisibility() == View.VISIBLE) {
-            mPaddingLayout.setAnimation(AnimationUtils.loadAnimation(mAppCompatActivity, android.R.anim.fade_out));
+            mPaddingLayout.setAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
             mPaddingLayout.setVisibility(View.GONE);
             fullScreen(true);
         } else {
             fullScreen(false);
-            mPaddingLayout.setAnimation(AnimationUtils.loadAnimation(mAppCompatActivity, android.R.anim.fade_in));
+            mPaddingLayout.setAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
             mPaddingLayout.setVisibility(View.VISIBLE);
         }
     }
     
     private void fullScreen(boolean enable) {
+    
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            return;
+        }
         
         if (enable) {
             WindowManager.LayoutParams lp = mDialogWindow.getAttributes();
-            lp.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            lp.flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
             mDialogWindow.setAttributes(lp);
 //            mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         } else {
             WindowManager.LayoutParams attr = mDialogWindow.getAttributes();
-            attr.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            attr.flags &= (~WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             mDialogWindow.setAttributes(attr);
 //            mDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }

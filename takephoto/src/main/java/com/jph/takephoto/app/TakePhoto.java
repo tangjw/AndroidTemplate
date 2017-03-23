@@ -69,13 +69,13 @@ public interface TakePhoto {
      * 从相机获取图片(不裁剪)
      * @param outPutUri 图片保存的路径
      */
-    void onPickFromCapture(Uri outPutUri);
+    void onPickFromCapture();
     /**
      * 从相机获取图片并裁剪
      * @param outPutUri 图片裁剪之后保存的路径
      * @param options 裁剪配置             
      */
-    void onPickFromCaptureWithCrop(Uri outPutUri, CropOptions options);
+    void onPickFromCaptureWithCrop(CropOptions options);
 
     /**
      * 裁剪图片

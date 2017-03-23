@@ -61,8 +61,8 @@ public class MainFragment2 extends BaseFragment {
     
         mXRecyclerView.addHeaderView(new SimpleHeaderView(mActivity));
     
-        View viewById = mRootView.findViewById(R.id.emptyview);
-        viewById.setOnClickListener(new View.OnClickListener() {
+        View emptyView = mRootView.findViewById(R.id.emptyview);
+        emptyView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
             
@@ -72,8 +72,9 @@ public class MainFragment2 extends BaseFragment {
                 mAdapter.notifyDataSetChanged();*/
             }
         });
-        mXRecyclerView.setEmptyView(viewById);
-        
+        mXRecyclerView.setEmptyView(emptyView);
+
+//        mXRecyclerView
         
         mXRecyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
