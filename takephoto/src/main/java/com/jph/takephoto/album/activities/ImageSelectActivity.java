@@ -183,7 +183,6 @@ public class ImageSelectActivity extends HelperActivity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case Constants.PERMISSION_GRANTED: {
-                        System.out.println("加载相册加载 图片");
                         loadAlbums();
                         loadImages();
                         break;

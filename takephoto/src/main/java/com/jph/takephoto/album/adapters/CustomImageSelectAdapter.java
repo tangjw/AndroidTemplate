@@ -54,7 +54,6 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
         }
     
         if (arrayList.get(position).path.endsWith(".gif") || arrayList.get(position).path.contains(".gif")) {
-            System.out.println("gif ------");
             Glide.with(context)
                     .load(arrayList.get(position).path)
 //                    .asGif()

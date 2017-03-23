@@ -21,6 +21,7 @@ import com.jph.takephoto.model.TakePhotoOptions;
 import com.jph.takephoto.permission.InvokeListener;
 import com.jph.takephoto.permission.PermissionManager;
 import com.jph.takephoto.permission.TakePhotoInvocationHandler;
+import com.orhanobut.logger.Logger;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseActivity;
 
@@ -71,15 +72,22 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     }
     
     public void openCamera(View view) {
-        File file = new File(Environment.getExternalStorageDirectory() + "/temp/" + System.currentTimeMillis() + ".jpg");
-//        if (!file.exists()) {
-//            file.mkdirs();
-//        }
+        // new File 正确姿势
+        File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
+        if (!path.exists()) {
+            path.mkdirs();
+        }
+        File file = new File(path, System.currentTimeMillis() + ".jpg");
+    
+        // 某国产手机不支持
+//        File file2 = new File(Environment.getExternalStorageDirectory() + "/temp/" + ".jpg");
+        
+        
         Uri imageUri = Uri.fromFile(file);
-//        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
         setCompress();
         setPhotoOption();
-        mTakePhoto.onPickFromCapture(imageUri);
+//        mTakePhoto.onPickFromCapture(imageUri);
+        mTakePhoto.onPickFromCaptureWithCrop(imageUri, getCropOptions());
         
     }
     
@@ -90,36 +98,39 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     }
     
     private void setPhotoOption() {
-        TakePhotoOptions.Builder builder=new TakePhotoOptions.Builder();
+        TakePhotoOptions.Builder builder = new TakePhotoOptions.Builder();
         //设置纠正照片方向
         builder.setCorrectImage(true);
         mTakePhoto.setTakePhotoOptions(builder.create());
     }
     
     public void openAlbum(View view) {
-        setCompress();
-        setPhotoOption();
-        mTakePhoto.onPickMultiple(9);
-//        mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
+//        mTakePhoto.onPickMultiple(9);
+        mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
     }
     
     @Override
     public void takeSuccess(TResult result) {
+    
+        Logger.i(result.getImages().get(0).getOriginalPath());
         
         Glide.with(this)
                 .load(result.getImages().get(0).getOriginalPath())
                 .into(mImageView);
+    
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                Uri.parse("file://" + result.getImages().get(0).getOriginalPath())));
         
     }
     
     @Override
     public void takeFail(TResult result, String msg) {
-        System.out.println("takeFail");
+        Logger.i("takeFail");
     }
     
     @Override
     public void takeCancel() {
-        System.out.println("takeCancel");
+        Logger.i("takeCancel");
     }
     
     @Override
@@ -146,7 +157,7 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
      */
     private CropOptions getCropOptions() {
         CropOptions.Builder builder = new CropOptions.Builder();
-        builder.setOutputX(600).setOutputY(600);
+        builder.setOutputX(480).setOutputY(480);
         builder.setAspectX(1).setAspectY(1);
         builder.setWithOwnCrop(false);
         return builder.create();

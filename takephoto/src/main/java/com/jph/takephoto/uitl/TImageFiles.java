@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 /**
  * ImageFiles工具类
@@ -95,12 +94,17 @@ public class TImageFiles {
     public static File getTempFile(Activity context, Uri photoUri)throws TException {
         String minType=getMimeType(context, photoUri);
         if (!checkMimeType(context,minType))throw new TException(TExceptionType.TYPE_NOT_IMAGE);
-        File filesDir=context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        if (!filesDir.exists())filesDir.mkdirs();
-        File photoFile = new File(filesDir, UUID.randomUUID().toString() + "." +minType );
-        return photoFile;
+//        File filesDir=context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        if (!filesDir.exists())filesDir.mkdirs();
+//        File photoFile = new File(filesDir, UUID.randomUUID().toString() + "." +minType );
+        File file = new File(Environment.getExternalStorageDirectory(), "/img_tmp/" + System.currentTimeMillis() + "." + minType);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        return file;
     }
-
+    
+    
     /**
      * 检查文件类型是否是图片
      * @param minType

@@ -115,7 +115,6 @@ public class AlbumSelectActivity extends HelperActivity {
                     
                     case Constants.FETCH_COMPLETED: {
                         if (adapter == null) {
-                            System.out.println("****" + albums.size());
                             adapter = new CustomAlbumSelectAdapter(getApplicationContext(), albums);
                             gridView.setAdapter(adapter);
                             
