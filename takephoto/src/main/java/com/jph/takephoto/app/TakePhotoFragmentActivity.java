@@ -22,9 +22,9 @@ import com.jph.takephoto.permission.TakePhotoInvocationHandler;
  * GitHub:https://github.com/crazycodeboy
  * Eamil:crazycodeboy@gmail.com
  */
-public class TakePhotoFragmentActivity extends FragmentActivity implements TakePhoto.TakeResultListener,InvokeListener {
+public class TakePhotoFragmentActivity extends FragmentActivity implements SelectImage.TakeResultListener, InvokeListener {
     private static final String TAG = TakePhotoFragmentActivity.class.getName();
-    private TakePhoto takePhoto;
+    private SelectImage takePhoto;
     private InvokeParam invokeParam;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +51,9 @@ public class TakePhotoFragmentActivity extends FragmentActivity implements TakeP
      *  获取TakePhoto实例
      * @return
      */
-    public TakePhoto getTakePhoto(){
+    public SelectImage getTakePhoto() {
         if (takePhoto==null){
-            takePhoto= (TakePhoto) TakePhotoInvocationHandler.of(this).bind(new TakePhotoImpl(this,this));
+            takePhoto = (SelectImage) TakePhotoInvocationHandler.of(this).bind(new TakePhotoImpl(this, this));
         }
         return takePhoto;
     }

@@ -65,10 +65,8 @@ public class CompressImageUtil{
 					bitmap.compress(Bitmap.CompressFormat.JPEG, options, baos);//将压缩后的图片保存到baos中
 					if(options==5)break;//如果图片的质量已降到最低则，不再进行压缩
 				}
-//				if(bitmap!=null&&!bitmap.isRecycled()){
-//					bitmap.recycle();//回收内存中的图片
-//				}
-				try {
+                
+                try {
 					File thumbnailFile=getThumbnailFile(new File(imgPath));
 					FileOutputStream fos = new FileOutputStream(thumbnailFile);//将压缩后的图片保存的本地上指定路径中
 					fos.write(baos.toByteArray());

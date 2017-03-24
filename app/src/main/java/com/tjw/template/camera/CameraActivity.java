@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.jph.takephoto.app.TakePhoto;
+import com.jph.takephoto.app.SelectImage;
 import com.jph.takephoto.app.TakePhotoImpl;
 import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
@@ -29,13 +29,13 @@ import com.tjw.template.swipeback.BaseActivity;
  * Created by tang-jw on 2017/3/16.
  */
 
-public class CameraActivity extends BaseActivity implements TakePhoto.TakeResultListener, InvokeListener {
+public class CameraActivity extends BaseActivity implements SelectImage.TakeResultListener, InvokeListener {
     
     private ImageView mImageView;
     
     private InvokeParam mInvokeParam;
     
-    private TakePhoto mTakePhoto;
+    private SelectImage mTakePhoto;
     
     @Override
     protected void beforeSuperCreate(@Nullable Bundle savedInstanceState) {
@@ -69,21 +69,9 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     }
     
     public void openCamera(View view) {
-        // new File 正确姿势
-        /*File path = new File(Environment.getExternalStorageDirectory() + "/img_tmp/");
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        File file = new File(path, System.currentTimeMillis() + ".jpg");
-    
-        // 某国产手机不支持
-//        File file2 = new File(Environment.getExternalStorageDirectory() + "/temp/" + ".jpg");
-        
-        
-        Uri imageUri = Uri.fromFile(file);*/
         setCompress();
         setPhotoOption();
-//        mTakePhoto.onPickFromCapture(imageUri);
+//        mTakePhoto.onPickFromCapture();
         mTakePhoto.onPickFromCaptureWithCrop(getCropOptions());
         
     }
@@ -91,7 +79,6 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     private void setCompress() {
         CompressConfig compressConfig = new CompressConfig.Builder().create();
         compressConfig.enableReserveRaw(true);
-        mTakePhoto.onEnableCompress(compressConfig, false);
     }
     
     private void setPhotoOption() {
@@ -104,19 +91,16 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     public void openAlbum(View view) {
 //        mTakePhoto.onPickMultiple(9);
         mTakePhoto.onPickMultipleWithCrop(1, getCropOptions());
+    
+        mTakePhoto.fromAlbum(9);
     }
     
     @Override
     public void takeSuccess(TResult result) {
-    
-        Logger.i(result.getImages().get(0).getOriginalPath());
         
         Glide.with(this)
                 .load(result.getImages().get(0).getOriginalPath())
                 .into(mImageView);
-
-//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-//                Uri.parse("file://" + result.getImages().get(0).getOriginalPath())));
     
         for (TImage img : result.getImages()) {
             System.out.println(img.getOriginalPath());
@@ -146,9 +130,9 @@ public class CameraActivity extends BaseActivity implements TakePhoto.TakeResult
     /**
      * 获取TakePhoto实例
      */
-    public TakePhoto getTakePhoto() {
+    public SelectImage getTakePhoto() {
         if (mTakePhoto == null) {
-            mTakePhoto = (TakePhoto) TakePhotoInvocationHandler.of(this).bind(new TakePhotoImpl(this, this));
+            mTakePhoto = (SelectImage) TakePhotoInvocationHandler.of(this).bind(new TakePhotoImpl(this, this));
         }
         return mTakePhoto;
     }

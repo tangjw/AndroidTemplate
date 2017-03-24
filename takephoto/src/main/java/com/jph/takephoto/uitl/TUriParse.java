@@ -49,7 +49,7 @@ public class TUriParse {
      * @return
      */
     public static Uri getTempUri(Context context) {
-        File file = new File(Environment.getExternalStorageDirectory(), "/img_tmp/" + System.currentTimeMillis() + ".jpg");
+        File file = new File(Environment.getExternalStorageDirectory(), "/zonsim/" + System.currentTimeMillis() + ".jpg");
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }

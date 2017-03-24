@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.jph.takephoto.R;
-import com.jph.takephoto.app.TakePhoto;
+import com.jph.takephoto.app.SelectImage;
 import com.jph.takephoto.model.InvokeParam;
 import com.jph.takephoto.model.TContextWrap;
 import com.jph.takephoto.uitl.TConstant;
@@ -124,7 +124,8 @@ public class PermissionManager {
         }
         return TPermissionType.WAIT;
     }
-    public static void handlePermissionsResult(Activity activity, TPermissionType type, InvokeParam invokeParam, TakePhoto.TakeResultListener listener){
+    
+    public static void handlePermissionsResult(Activity activity, TPermissionType type, InvokeParam invokeParam, SelectImage.TakeResultListener listener) {
                 String tip=null;
                 switch (type){
                     case DENIED:

@@ -3,7 +3,7 @@ package com.jph.takephoto.model;
 import java.util.ArrayList;
 
 /**
- * TakePhoto 操作成功返回的处理结果
+ * SelectImage 操作成功返回的处理结果
  * Author: JPH
  * Date: 2016/8/11 17:01
  */

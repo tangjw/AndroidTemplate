@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -20,6 +19,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * ImageFiles工具类
@@ -94,16 +96,30 @@ public class TImageFiles {
     public static File getTempFile(Activity context, Uri photoUri)throws TException {
         String minType=getMimeType(context, photoUri);
         if (!checkMimeType(context,minType))throw new TException(TExceptionType.TYPE_NOT_IMAGE);
-//        File filesDir=context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-//        if (!filesDir.exists())filesDir.mkdirs();
-//        File photoFile = new File(filesDir, UUID.randomUUID().toString() + "." +minType );
-        File file = new File(Environment.getExternalStorageDirectory(), "/img_tmp/" + System.currentTimeMillis() + "." + minType);
+    
+        File file = new File(context.getCacheDir(), "/img/avatar." + minType);
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
         return file;
     }
     
+    
+    /**
+     * 根据系统时间、前缀、后缀产生一个文件
+     */
+    private File createFile(File folder, String prefix, String suffix) {
+        if (!folder.exists() || !folder.isDirectory()) folder.mkdirs();
+        try {
+            File nomedia = new File(folder, ".nomedia");  //在当前文件夹底下创建一个 .nomedia 文件
+            if (!nomedia.exists()) nomedia.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA);
+        String filename = prefix + dateFormat.format(new Date(System.currentTimeMillis())) + suffix;
+        return new File(folder, filename);
+    }
     
     /**
      * 检查文件类型是否是图片
