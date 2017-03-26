@@ -447,7 +447,7 @@ public class TakePhotoImpl implements SelectImage {
     }
     
     
-    private void handleTakeCallBack(final TResult result, String... message) {
+    private void handleTakeCallBack(TResult result, String... message) {
         if (message.length > 0) {
             listener.takeFail(result, message[0]);
     

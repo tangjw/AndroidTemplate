@@ -53,7 +53,16 @@ public class TUriParse {
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
-        return getUriForFile(context, file);
+    
+        return Uri.fromFile(file);
+        /*if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+           
+            return getUriForFile(context, file);
+        } else {
+            return Uri.fromFile(file);
+        }*/
+        
+        
     }
     
     /**

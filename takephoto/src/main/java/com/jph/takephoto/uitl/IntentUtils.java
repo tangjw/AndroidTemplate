@@ -74,6 +74,7 @@ public class IntentUtils {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);//设置Action为拍照
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outPutUri);//将拍取的照片保存到指定URI
+    
         return intent;
     }
     /**

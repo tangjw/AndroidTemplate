@@ -7,7 +7,7 @@ import android.view.View;
 
 import com.tjw.template.R;
 import com.tjw.template.bottomnav.BaseFragment;
-import com.tjw.template.camera.CameraActivity;
+import com.tjw.template.camera.CameraActivity2;
 
 /**
  * ^-^
@@ -39,7 +39,7 @@ public class MainFragment3 extends BaseFragment {
         mRootView.findViewById(R.id.button5).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(mActivity, CameraActivity.class));
+                startActivity(new Intent(mActivity, CameraActivity2.class));
                 
             }
         });
