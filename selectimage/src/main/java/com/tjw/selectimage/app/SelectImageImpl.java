@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.album.models.Image;
+import com.tjw.selectimage.crop.CropActivity;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.TContextWrap;
 import com.tjw.selectimage.model.TException;
@@ -157,7 +158,14 @@ public class SelectImageImpl implements SelectImage {
             throw new TException(TExceptionType.TYPE_NOT_IMAGE);
         }
     
-        TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, cropImageUri, options);
+        System.out.println(imageUri);
+    
+        Intent intent = new Intent(contextWrap.getActivity(), CropActivity.class);
+        intent.putExtra("rawImageUri", imageUri);
+        intent.putExtra("cropImageUri", cropImageUri);
+        contextWrap.getActivity().startActivityForResult(intent, TConstant.RC_CROP);
+
+//        TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, cropImageUri, options);
     }
     
     
@@ -207,7 +215,8 @@ public class SelectImageImpl implements SelectImage {
                         handleResult(null, e.getDetailMessage());
                         e.printStackTrace();
                     }
-                    
+    
+    
                 } else {
                     
                     listener.selectCancel();

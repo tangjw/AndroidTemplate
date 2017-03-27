@@ -53,7 +53,7 @@ public class TImageFiles {
         } finally {
             if (fos != null) try {
                 fos.close();
-                if (bos != null) bos.close();
+                bos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
