@@ -264,7 +264,15 @@ public class SelectImageImpl implements SelectImage {
      * @return cache目录下"/user/avatar.jpg"
      */
     private File createCropFile() {
+    
+       /* if (file.exists()) {
+            file.delete();
+        }*/
+        
         File file = new File(contextWrap.getActivity().getExternalCacheDir().getAbsolutePath() + "/user/avatar.jpg");
+        if (file.exists()) {
+            file.delete();
+        }
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }

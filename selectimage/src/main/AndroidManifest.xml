@@ -41,6 +41,16 @@
             </intent-filter>-->
         </activity>
 
+        <activity
+            android:name=".crop.CropActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/MultiImageSelectTheme">
+            <!--<intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>-->
+        </activity>
+
     </application>
 
 </manifest>

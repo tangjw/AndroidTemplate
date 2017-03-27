@@ -8,9 +8,11 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.StringSignature;
 import com.orhanobut.logger.Logger;
 import com.tjw.selectimage.app.SelectImage;
 import com.tjw.selectimage.app.SelectImageImpl;
+import com.tjw.selectimage.crop.CropActivity;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.InvokeParam;
 import com.tjw.selectimage.model.TContextWrap;
@@ -21,6 +23,8 @@ import com.tjw.selectimage.permission.PermissionManager;
 import com.tjw.selectimage.permission.TakePhotoInvocationHandler;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseActivity;
+
+import java.util.UUID;
 
 /**
  * ^-^
@@ -81,8 +85,11 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         
         Glide.with(this)
                 .load(result.getImages().get(0).getOriginalPath())
+                .signature(new StringSignature(UUID.randomUUID().toString()))
+                .error(R.drawable.ic_mine)
                 .into(mImageView);
-        
+    
+    
         for (TImage img : result.getImages()) {
             System.out.println(img.getOriginalPath());
         }
@@ -136,5 +143,11 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
     
     public void open2(View view) {
         mTakePhoto.fromAlbum(9);
+    }
+    
+    public void setLauncherIconBadgeNumber(View view) {
+//        LauncherIconUtils.sendBadgeNumber(this,"100");
+        startActivity(new Intent(this, CropActivity.class));
+        
     }
 }

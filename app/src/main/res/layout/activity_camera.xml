@@ -58,5 +58,12 @@
         android:onClick="open2"
         android:text="相册多选"
         android:textAllCaps="false"/>
-    
+
+    <Button
+        android:id="@+id/button8"
+        android:onClick="setLauncherIconBadgeNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button"/>
+
 </LinearLayout>
