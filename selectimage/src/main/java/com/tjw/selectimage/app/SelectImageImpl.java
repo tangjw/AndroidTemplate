@@ -113,8 +113,8 @@ public class SelectImageImpl implements SelectImage {
         this.cropOptions = options;
         
         this.rawImageUri = file2uri(createOutFile());
-        
-        this.cropImageUri = file2uri(createCropFile());
+    
+        this.cropImageUri = Uri.fromFile(createCropFile());
         
         try {
             TUtils.captureBySafely(contextWrap, new TIntentWap(IntentUtils.getCaptureIntent(this.rawImageUri), TConstant.RC_PICK_PICTURE_FROM_CAPTURE_CROP));
@@ -143,7 +143,7 @@ public class SelectImageImpl implements SelectImage {
         
         this.fromType = TImage.FromType.OTHER;
         this.cropOptions = options;
-        this.cropImageUri = TUriParse.getTempUri(contextWrap.getActivity());
+        this.cropImageUri = Uri.fromFile(createCropFile());
         
         TUtils.startActivityForResult(contextWrap, new TIntentWap(IntentUtils.getPickMultipleIntent(contextWrap, 1), TConstant.RC_PICK_MULTIPLE));
     }
@@ -156,11 +156,8 @@ public class SelectImageImpl implements SelectImage {
             Toast.makeText(contextWrap.getActivity(), contextWrap.getActivity().getResources().getText(R.string.tip_type_not_image), Toast.LENGTH_SHORT).show();
             throw new TException(TExceptionType.TYPE_NOT_IMAGE);
         }
-        
-        
-        File file = new File(TUriParse.parseOwnUri(contextWrap.getActivity(), cropImageUri));
-        
-        TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, Uri.fromFile(file), options);
+    
+        TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, cropImageUri, options);
     }
     
     
@@ -267,14 +264,16 @@ public class SelectImageImpl implements SelectImage {
      * @return files目录下"/user/avatar.jpg"
      */
     private File createCropFile() {
-        
-        File path = new File(contextWrap.getActivity().getFilesDir().getAbsolutePath(), "user");
+        File file = new File(contextWrap.getActivity().getExternalCacheDir().getAbsolutePath() + "/user/avatar.jpg");
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        /*File path = new File(contextWrap.getActivity().getFilesDir().getAbsolutePath(), "user");
         
         if (!path.exists() || !path.isDirectory()) {
             path.mkdirs();
-        }
-        
-        return new File(path, "avatar.jpg");
+        }*/
+        return file;
         
     }
     
