@@ -261,7 +261,7 @@ public class SelectImageImpl implements SelectImage {
     /**
      * 创建一个用于输出剪切后的File
      *
-     * @return files目录下"/user/avatar.jpg"
+     * @return cache目录下"/user/avatar.jpg"
      */
     private File createCropFile() {
         File file = new File(contextWrap.getActivity().getExternalCacheDir().getAbsolutePath() + "/user/avatar.jpg");

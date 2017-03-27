@@ -6,13 +6,13 @@
                 android:background="@android:color/black"
                 android:fitsSystemWindows="false">
 
-    <com.jph.takephoto.album.widget.ImagePreviewViewPager
+    <com.tjw.selectimage.album.widget.ImagePreviewViewPager
         android:id="@+id/vp_images"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"/>
 
-    <com.jph.takephoto.album.widget.PaddingToFrameLayout
+    <com.tjw.selectimage.album.widget.PaddingToFrameLayout
         android:layout_width="match_parent"
         android:id="@+id/paddinglayout"
         android:layout_height="wrap_content">
@@ -46,6 +46,6 @@
 
 
         </android.support.design.widget.AppBarLayout>
-    </com.jph.takephoto.album.widget.PaddingToFrameLayout>
+    </com.tjw.selectimage.album.widget.PaddingToFrameLayout>
 
 </RelativeLayout>
