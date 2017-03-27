@@ -25,38 +25,38 @@
 
     <Button
         android:id="@+id/button"
-        android:layout_marginTop="30dp"
-        android:layout_width="90dp"
-        android:onClick="openCamera"
-        android:textAllCaps="false"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="拍照"/>
+        android:layout_marginTop="30dp"
+        android:onClick="openCamera"
+        android:text="拍照"
+        android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/button4"
-        android:textAllCaps="false"
-        android:layout_marginTop="10dp"
-        android:layout_width="90dp"
-        android:onClick="openAlbum"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="相册"/>
+        android:layout_marginTop="10dp"
+        android:onClick="openAlbum"
+        android:text="相册"
+        android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/button6"
-        android:textAllCaps="false"
-        android:layout_marginTop="10dp"
-        android:layout_width="90dp"
-        android:onClick="open1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="拍照不剪裁"/>
+        android:layout_marginTop="10dp"
+        android:onClick="open1"
+        android:text="拍照不剪裁"
+        android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/button7"
-        android:textAllCaps="false"
-        android:layout_marginTop="10dp"
-        android:layout_width="90dp"
-        android:onClick="open2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="相册多选"/>
+        android:layout_marginTop="10dp"
+        android:onClick="open2"
+        android:text="相册多选"
+        android:textAllCaps="false"/>
     
 </LinearLayout>

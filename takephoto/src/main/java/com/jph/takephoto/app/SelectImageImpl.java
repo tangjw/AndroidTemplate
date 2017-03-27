@@ -17,7 +17,6 @@ import com.jph.takephoto.R;
 import com.jph.takephoto.album.helpers.Constants;
 import com.jph.takephoto.album.models.Image;
 import com.jph.takephoto.model.CropOptions;
-import com.jph.takephoto.model.MultipleCrop;
 import com.jph.takephoto.model.TContextWrap;
 import com.jph.takephoto.model.TException;
 import com.jph.takephoto.model.TExceptionType;
@@ -48,7 +47,7 @@ public class SelectImageImpl implements SelectImage {
     private static final String TAG = "SelectImageImpl";
     
     private TContextWrap contextWrap;
-    private TakeResultListener listener;
+    private SelectResultListener listener;
     private Uri rawImageUri;
     private Uri cropImageUri;
     private CropOptions cropOptions;
@@ -56,12 +55,12 @@ public class SelectImageImpl implements SelectImage {
     private PermissionManager.TPermissionType permissionType;
     private TImage.FromType fromType; //CAMERA图片来源相机，OTHER图片来源其他
     
-    public SelectImageImpl(Activity activity, TakeResultListener listener) {
+    public SelectImageImpl(Activity activity, SelectResultListener listener) {
         contextWrap = TContextWrap.of(activity);
         this.listener = listener;
     }
     
-    public SelectImageImpl(Fragment fragment, TakeResultListener listener) {
+    public SelectImageImpl(Fragment fragment, SelectResultListener listener) {
         contextWrap = TContextWrap.of(fragment);
         this.listener = listener;
     }
@@ -88,11 +87,6 @@ public class SelectImageImpl implements SelectImage {
     @Override
     public void permissionNotify(PermissionManager.TPermissionType type) {
         this.permissionType = type;
-    }
-    
-    @Override
-    public void setTakePhotoOptions(TakePhotoOptions options) {
-        
     }
     
     
@@ -166,37 +160,6 @@ public class SelectImageImpl implements SelectImage {
         TUtils.startActivityForResult(contextWrap, new TIntentWap(IntentUtils.getPickMultipleIntent(contextWrap, 1), TConstant.RC_PICK_MULTIPLE));
     }
     
-    @Override
-    public void onPickFromGallery() {
-        
-    }
-    
-    
-    @Override
-    public void onPickFromGalleryWithCrop(Uri outPutUri, CropOptions options) {
-        
-    }
-    
-    @Override
-    public void onPickMultiple(int limit) {
-        
-    }
-    
-    
-    @Override
-    public void onPickMultipleWithCrop(int limit, CropOptions options) {
-        
-    }
-    
-    @Override
-    public void onPickFromCapture() {
-        
-    }
-    
-    @Override
-    public void onPickFromCaptureWithCrop(CropOptions options) {
-        
-    }
     
     @Override
     public void onCrop(Uri imageUri, Uri outPutUri, CropOptions options) throws TException {
@@ -207,10 +170,6 @@ public class SelectImageImpl implements SelectImage {
         TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, outPutUri, options);
     }
     
-    @Override
-    public void onCrop(MultipleCrop multipleCrop, CropOptions options) throws TException {
-        onCrop(multipleCrop.getUris().get(0), multipleCrop.getOutUris().get(0), options);
-    }
     
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -228,7 +187,7 @@ public class SelectImageImpl implements SelectImage {
                         handleResult(null, e.getDetailMessage());
                     }
                 } else {
-                    listener.takeCancel();
+                    listener.selectCancel();
                 }
                 break;
         
@@ -243,7 +202,7 @@ public class SelectImageImpl implements SelectImage {
                         handleResult(null, e.getDetailMessage());
                     }
                 } else {
-                    listener.takeCancel();
+                    listener.selectCancel();
                 }
                 break;
         
@@ -260,8 +219,8 @@ public class SelectImageImpl implements SelectImage {
                     }
                 
                 } else {
-                
-                    listener.takeCancel();
+    
+                    listener.selectCancel();
                 
                 }
                 break;
@@ -283,30 +242,12 @@ public class SelectImageImpl implements SelectImage {
                     }
                 
                 } else {
-                    listener.takeCancel();
+                    listener.selectCancel();
                 }
                 break;
         }
     }
     
-    
-    private void selectPicture(int defaultIndex, boolean isCrop) {
-        this.fromType = TImage.FromType.OTHER;
-        if (takePhotoOptions != null && takePhotoOptions.isWithOwnGallery()) {
-            onPickMultiple(1);
-            return;
-        }
-        if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) return;
-        ArrayList<TIntentWap> intentWapList = new ArrayList<>();
-        intentWapList.add(new TIntentWap(IntentUtils.getPickIntentWithDocuments(), isCrop ? TConstant.RC_PICK_PICTURE_FROM_DOCUMENTS_CROP : TConstant.RC_PICK_PICTURE_FROM_DOCUMENTS_ORIGINAL));
-        intentWapList.add(new TIntentWap(IntentUtils.getPickIntentWithGallery(), isCrop ? TConstant.RC_PICK_PICTURE_FROM_GALLERY_CROP : TConstant.RC_PICK_PICTURE_FROM_GALLERY_ORIGINAL));
-        try {
-            TUtils.sendIntentBySafely(contextWrap, intentWapList, defaultIndex, isCrop);
-        } catch (TException e) {
-            handleResult(null, e.getDetailMessage());
-            e.printStackTrace();
-        }
-    }
     
     
     /**
@@ -334,11 +275,11 @@ public class SelectImageImpl implements SelectImage {
     private void handleResult(TResult result, String message) {
         
         if (result == null) {
-            listener.takeFail(null, message);
+            listener.selectFail(message);
             return;
         }
-        
-        listener.takeSuccess(result);
+    
+        listener.selectSuccess(result);
         
         takePhotoOptions = null;
         cropOptions = null;

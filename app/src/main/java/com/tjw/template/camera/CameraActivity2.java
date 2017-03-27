@@ -8,17 +8,17 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.jph.takephoto.app.SelectImage;
-import com.jph.takephoto.app.SelectImageImpl;
-import com.jph.takephoto.model.CropOptions;
-import com.jph.takephoto.model.InvokeParam;
-import com.jph.takephoto.model.TContextWrap;
-import com.jph.takephoto.model.TImage;
-import com.jph.takephoto.model.TResult;
-import com.jph.takephoto.permission.InvokeListener;
-import com.jph.takephoto.permission.PermissionManager;
-import com.jph.takephoto.permission.TakePhotoInvocationHandler;
 import com.orhanobut.logger.Logger;
+import com.tjw.selectimage.app.SelectImage;
+import com.tjw.selectimage.app.SelectImageImpl;
+import com.tjw.selectimage.model.CropOptions;
+import com.tjw.selectimage.model.InvokeParam;
+import com.tjw.selectimage.model.TContextWrap;
+import com.tjw.selectimage.model.TImage;
+import com.tjw.selectimage.model.TResult;
+import com.tjw.selectimage.permission.InvokeListener;
+import com.tjw.selectimage.permission.PermissionManager;
+import com.tjw.selectimage.permission.TakePhotoInvocationHandler;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseActivity;
 
@@ -27,7 +27,7 @@ import com.tjw.template.swipeback.BaseActivity;
  * Created by tang-jw on 2017/3/16.
  */
 
-public class CameraActivity2 extends BaseActivity implements SelectImage.TakeResultListener, InvokeListener {
+public class CameraActivity2 extends BaseActivity implements SelectImage.SelectResultListener, InvokeListener {
     
     private ImageView mImageView;
     
@@ -77,7 +77,7 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.TakeRes
     }
     
     @Override
-    public void takeSuccess(TResult result) {
+    public void selectSuccess(TResult result) {
         
         Glide.with(this)
                 .load(result.getImages().get(0).getOriginalPath())
@@ -90,13 +90,13 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.TakeRes
     }
     
     @Override
-    public void takeFail(TResult result, String msg) {
-        Logger.i("takeFail");
+    public void selectFail(String msg) {
+        Logger.i("selectFail");
     }
     
     @Override
-    public void takeCancel() {
-        Logger.i("takeCancel");
+    public void selectCancel() {
+        Logger.i("selectCancel");
     }
     
     @Override
@@ -129,11 +129,12 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.TakeRes
         return builder.create();
     }
     
+    
     public void open1(View view) {
-        mTakePhoto.onPickFromCapture();
+        mTakePhoto.fromCamera();
     }
     
     public void open2(View view) {
-        mTakePhoto.onPickMultiple(9);
+        mTakePhoto.fromAlbum(9);
     }
 }

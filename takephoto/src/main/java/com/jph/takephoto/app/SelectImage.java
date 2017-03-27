@@ -7,10 +7,8 @@ import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 
 import com.jph.takephoto.model.CropOptions;
-import com.jph.takephoto.model.MultipleCrop;
 import com.jph.takephoto.model.TException;
 import com.jph.takephoto.model.TResult;
-import com.jph.takephoto.model.TakePhotoOptions;
 import com.jph.takephoto.permission.PermissionManager;
 
 public interface SelectImage {
@@ -42,48 +40,6 @@ public interface SelectImage {
      */
     void fromAlbum(@Nullable CropOptions options);
     
-    
-    
-    /**
-     * 从相册中获取图片（不裁剪）
-     */
-    void onPickFromGallery();
-    /**
-     * 从相册中获取图片并裁剪
-     * @param outPutUri 图片裁剪之后保存的路径
-     * @param options 裁剪配置
-     */
-    void onPickFromGalleryWithCrop(Uri outPutUri, CropOptions options);
-    
-    
-    /**
-     * 图片多选
-     *
-     * @param limit 最多选择图片张数的限制
-     */
-    void onPickMultiple(int limit);
-    
-    /**
-     * 图片多选，并裁切
-     *
-     * @param limit   最多选择图片张数的限制
-     * @param options 裁剪配置
-     */
-    void onPickMultipleWithCrop(int limit, CropOptions options);
-    
-    
-    /**
-     * 从相机获取图片(不裁剪)
-     */
-    void onPickFromCapture();
-    
-    /**
-     * 从相机获取图片并裁剪
-     *
-     * @param options 裁剪配置
-     */
-    void onPickFromCaptureWithCrop(CropOptions options);
-    
     /**
      * 裁剪图片
      *
@@ -93,23 +49,7 @@ public interface SelectImage {
      */
     void onCrop(Uri imageUri, Uri outPutUri, CropOptions options) throws TException;
     
-    /**
-     * 裁剪多张图片
-     *
-     * @param multipleCrop 要裁切的图片的路径以及输出路径
-     * @param options      裁剪配置
-     */
-    void onCrop(MultipleCrop multipleCrop, CropOptions options) throws TException;
-    
     void permissionNotify(PermissionManager.TPermissionType type);
-    
-    
-    /**
-     * 设置TakePhoto相关配置
-     *
-     * @param options
-     */
-    void setTakePhotoOptions(TakePhotoOptions options);
     
     void onCreate(Bundle savedInstanceState);
     
@@ -117,21 +57,17 @@ public interface SelectImage {
     
     /**
      * 处理拍照或从相册选择的图片或裁剪的结果
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
      */
     void onActivityResult(int requestCode, int resultCode, Intent data);
     
     /**
-     * 拍照结果监听接口
+     * 选择图片结果监听接口
      */
-    interface TakeResultListener {
-        void takeSuccess(TResult result);
-        
-        void takeFail(TResult result, String msg);
-        
-        void takeCancel();
+    interface SelectResultListener {
+        void selectSuccess(TResult result);
+    
+        void selectFail(String msg);
+    
+        void selectCancel();
     }
 }

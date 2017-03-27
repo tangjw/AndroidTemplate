@@ -51,12 +51,7 @@
         <activity
             android:name=".rxjava2.RxJava2Activity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity
-            android:name=".camera.CameraActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.SwipeBack"
-            /> <!--android:hardwareAccelerated="false"-->
+        <!--android:hardwareAccelerated="false"-->
 
         <activity
             android:name=".camera.CameraActivity2"

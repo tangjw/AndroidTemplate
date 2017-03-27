@@ -25,7 +25,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile project(':swipebacklayout')
-    compile project(':takephoto')
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
@@ -39,4 +38,5 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.0'
     compile 'com.android.support:recyclerview-v7:25.3.0'
     testCompile 'junit:junit:4.12'
+    compile project(':selectimage')
 }

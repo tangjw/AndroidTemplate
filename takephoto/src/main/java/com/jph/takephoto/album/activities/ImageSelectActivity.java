@@ -347,12 +347,12 @@ public class ImageSelectActivity extends HelperActivity {
         }
         adapter.notifyDataSetChanged();
     
-        setActionText();
-    
+        setActionBarText();
+        
     }
     
     
-    private void setActionText() {
+    private void setActionBarText() {
         if (countSelected >= 1) {
             mTvPreview.setTextColor(Color.WHITE);
             mTvPreview.setText("预览(" + countSelected + ")");
@@ -373,35 +373,41 @@ public class ImageSelectActivity extends HelperActivity {
         adapter.notifyDataSetChanged();
     }
     
-    public void unselectId(long id, boolean isChecked) {
-        allImages.get(id).isSelected = isChecked;
+    public void setImageSelect(long id, boolean isChecked) {
         
-        if (isChecked) {
+        if (isChecked && !allImages.get(id).isSelected) {
             countSelected++;
             mSelectImages.add(id);
-        } else {
+            allImages.get(id).isSelected = true;
+            for (Image image : images) {
+                if (image.id == id) {
+                    image.isSelected = true;
+                }
+            }
+            adapter.notifyDataSetChanged();
+            setActionBarText();
+        } else if (!isChecked && allImages.get(id).isSelected) {
             mSelectImages.remove(id);
             countSelected--;
+            allImages.get(id).isSelected = false;
+            
+            for (Image image : images) {
+                if (image.id == id) {
+                    image.isSelected = false;
+                }
+            }
+            adapter.notifyDataSetChanged();
+            
+            
+            setActionBarText();
         }
         
-        for (Image image : images) {
-            if (image.id == id) {
-                image.isSelected = isChecked;
-            }
-        }
-        setActionText();
-        adapter.notifyDataSetChanged();
+        
     }
     
     private ArrayList<Image> getSelected() {
-//        mSelectImages
         ArrayList<Image> selectedImages = new ArrayList<>();
-        /*for (int i = 0, l = images.size(); i < l; i++) {
-            if (images.get(i).isSelected) {
-                selectedImages.add(images.get(i));
-            }
-        }*/
-        System.out.println(allImages.size());
+    
         for (int i = 0, nsize = allImages.size(); i < nsize; i++) {
             Image obj = allImages.valueAt(i);
             if (obj.isSelected) {
@@ -456,7 +462,7 @@ public class ImageSelectActivity extends HelperActivity {
             if (isAllAlbum) {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Images.Media.DATE_ADDED);
-        
+    
             } else {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
@@ -502,7 +508,6 @@ public class ImageSelectActivity extends HelperActivity {
             }
             cursor.close();
     
-            System.out.println("---" + allImages.size());
     
             if (images == null) {
                 images = new ArrayList<>();

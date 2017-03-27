@@ -1,2 +1,2 @@
-include ':app', ':swipebacklayout'
+include ':app', ':swipebacklayout', ':selectimage'
 include ':takephoto'

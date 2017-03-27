@@ -135,24 +135,23 @@ public class PermissionManager {
         return TPermissionType.WAIT;
     }
     
-    public static void handlePermissionsResult(Activity activity, TPermissionType type, InvokeParam invokeParam, SelectImage.TakeResultListener listener) {
+    public static void handlePermissionsResult(Activity activity, TPermissionType type, InvokeParam invokeParam, SelectImage.SelectResultListener listener) {
         String tip = null;
         switch (type) {
             case DENIED:
-                listener.takeFail(null, tip = activity.getResources().getString(R.string.tip_permission_camera_storage));
+                listener.selectFail(tip = activity.getResources().getString(R.string.tip_permission_camera_storage));
                 break;
             case ONLY_CAMERA_DENIED:
-                listener.takeFail(null, tip = activity.getResources().getString(R.string.tip_permission_camera));
+                listener.selectFail(tip = activity.getResources().getString(R.string.tip_permission_camera));
                 break;
             case ONLY_STORAGE_DENIED:
-                listener.takeFail(null, tip = activity.getResources().getString(R.string.tip_permission_storage));
+                listener.selectFail(tip = activity.getResources().getString(R.string.tip_permission_storage));
                 break;
             case GRANTED:
                 try {
                     invokeParam.getMethod().invoke(invokeParam.getProxy(), invokeParam.getArgs());
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    listener.takeFail(null, tip = activity.getResources().getString(R.string.tip_permission_camera_storage));
+                    listener.selectFail(tip = activity.getResources().getString(R.string.tip_permission_camera_storage));
                 }
                 break;
             default:

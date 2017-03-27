@@ -29,6 +29,7 @@ import com.jph.takephoto.album.models.Image;
 import com.jph.takephoto.album.widget.ZoomOutPageTransformer;
 import com.jph.takephoto.photoview.OnPhotoTapListener;
 import com.jph.takephoto.photoview.PhotoView;
+import com.jph.takephoto.uitl.L;
 
 import java.util.ArrayList;
 
@@ -92,13 +93,14 @@ public class ImagePreviewFragment extends DialogFragment {
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         BrowseAdapter adapter = new BrowseAdapter();
-        
+        final int[] i = {0};
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             
             @Override
             public void onPageSelected(int position) {
                 mToolbar.setTitle(position + 1 + "/" + mImages.size());
                 mCbSelect.setChecked(mImages.get(position).isSelected);
+                i[0] = position;
             }
             
         });
@@ -107,12 +109,15 @@ public class ImagePreviewFragment extends DialogFragment {
         mCbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            
-                mImages.get(mViewPager.getCurrentItem()).isSelected = isChecked;
-            
+    
+                L.i(i[0] + "当前选中状态1" + mImages.get(mViewPager.getCurrentItem()).isSelected);
                 if (mActivity != null) {
-                    mActivity.unselectId(mImages.get(mViewPager.getCurrentItem()).id, isChecked);
+                    mActivity.setImageSelect(mImages.get(mViewPager.getCurrentItem()).id, isChecked);
+                    L.i(i[0] + "当前选中状态2" + mImages.get(mViewPager.getCurrentItem()).isSelected);
                 }
+    
+                mImages.get(mViewPager.getCurrentItem()).isSelected = isChecked;
+                L.i(i[0] + "当前选中状态3" + mImages.get(mViewPager.getCurrentItem()).isSelected);
             }
         });
     }
