@@ -85,9 +85,11 @@ public class ClipImageLayout extends RelativeLayout {
      * 裁切图片
      *
      * @return
+     * @param outImageX
+     * @param outImageY
      */
-    public Bitmap clip() {
-        return mZoomImageView.clip();
+    public Bitmap clip(int outImageX, int outImageY) {
+        return mZoomImageView.clip(outImageX, outImageY);
     }
     
 }

@@ -12,9 +12,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.soundcloud.android.crop.Crop;
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.models.Image;
+import com.tjw.selectimage.crop.CropActivity;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.TContextWrap;
 import com.tjw.selectimage.model.TException;
@@ -139,9 +139,8 @@ public class TUtils {
         Intent nativeCropIntent = IntentUtils.getCropIntentWithOtherApp(imageUri, outPutUri, options);
         List result = contextWrap.getActivity().getPackageManager().queryIntentActivities(nativeCropIntent, PackageManager.MATCH_ALL);
         if (result.isEmpty()) {
-            cropWithOwnApp(contextWrap, imageUri, outPutUri, options);
+            cropWithSystemApp(contextWrap, imageUri, outPutUri, options);
         } else {
-            
             startActivityForResult(contextWrap, new TIntentWap(IntentUtils.getCropIntentWithOtherApp(imageUri, outPutUri, options), TConstant.RC_CROP));
         }
     }
@@ -154,7 +153,7 @@ public class TUtils {
      * @param outPutUri
      * @param options
      */
-    public static void cropWithOwnApp(TContextWrap contextWrap, Uri imageUri, Uri outPutUri, CropOptions options) {
+    /*public static void cropWithOwnApp(TContextWrap contextWrap, Uri imageUri, Uri outPutUri, CropOptions options) {
         if (options.getAspectX() * options.getAspectY() > 0) {
             if (contextWrap.getFragment() != null) {
                 Crop.of(imageUri, outPutUri).withAspect(options.getAspectX(), options.getAspectY()).start(contextWrap.getActivity(), contextWrap.getFragment());
@@ -174,6 +173,16 @@ public class TUtils {
                 Crop.of(imageUri, outPutUri).asSquare().start(contextWrap.getActivity());
             }
         }
+    }*/
+    public static void cropWithSystemApp(TContextWrap contextWrap, Uri imageUri, Uri outPutUri, CropOptions options) {
+        System.out.println(imageUri);
+    
+        Intent intent = new Intent(contextWrap.getActivity(), CropActivity.class);
+        intent.putExtra("outImageX", options.getOutputX());
+        intent.putExtra("outImageY", options.getOutputX());
+        intent.putExtra("rawImageUri", imageUri);
+        intent.putExtra("cropImageUri", outPutUri);
+        contextWrap.getActivity().startActivityForResult(intent, TConstant.RC_CROP);
     }
     
     /**

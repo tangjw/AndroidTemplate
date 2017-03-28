@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.album.models.Image;
-import com.tjw.selectimage.crop.CropActivity;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.TContextWrap;
 import com.tjw.selectimage.model.TException;
@@ -157,15 +156,19 @@ public class SelectImageImpl implements SelectImage {
             Toast.makeText(contextWrap.getActivity(), contextWrap.getActivity().getResources().getText(R.string.tip_type_not_image), Toast.LENGTH_SHORT).show();
             throw new TException(TExceptionType.TYPE_NOT_IMAGE);
         }
+        if (options.isWithSystemCrop()) {
+        
+            TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, cropImageUri, options);
+        
+        } else {
+        
+            TUtils.cropWithSystemApp(contextWrap, imageUri, cropImageUri, options);
+        
+        
+        } 
+        
     
-        System.out.println(imageUri);
-    
-        Intent intent = new Intent(contextWrap.getActivity(), CropActivity.class);
-        intent.putExtra("rawImageUri", imageUri);
-        intent.putExtra("cropImageUri", cropImageUri);
-        contextWrap.getActivity().startActivityForResult(intent, TConstant.RC_CROP);
-
-//        TUtils.cropWithOtherAppBySafely(contextWrap, imageUri, cropImageUri, options);
+       
     }
     
     
@@ -203,9 +206,8 @@ public class SelectImageImpl implements SelectImage {
                     listener.selectCancel();
                 }
                 break;
-            
-            case TConstant.RC_CROP://系统app裁剪照片返回结果
-//            case Crop.REQUEST_CROP://第三方裁剪照片返回结果
+    
+            case TConstant.RC_CROP:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
                         TImage image = TImage.of(TUriParse.getFilePathWithUri(cropImageUri, contextWrap.getActivity()), fromType);
@@ -216,21 +218,18 @@ public class SelectImageImpl implements SelectImage {
                         e.printStackTrace();
                     }
     
-    
                 } else {
-                    
                     listener.selectCancel();
                     
                 }
                 break;
-            
-            case TConstant.RC_PICK_MULTIPLE://多选图片返回结果
+    
+            case TConstant.RC_PICK_MULTIPLE:
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     ArrayList<Image> images = data.getParcelableArrayListExtra(Constants.INTENT_EXTRA_IMAGES);
                     if (cropOptions != null && images.size() == 1) {
                         try {
                             onCrop(file2uri(new File(images.get(0).path)), cropOptions);
-//                            onCrop(MultipleCrop.of(TUtils.convertImageToUri(contextWrap.getActivity(), images), contextWrap.getActivity(), fromType), cropOptions);
                         } catch (TException e) {
                             e.printStackTrace();
                         }
@@ -274,22 +273,11 @@ public class SelectImageImpl implements SelectImage {
      */
     private File createCropFile() {
     
-       /* if (file.exists()) {
-            file.delete();
-        }*/
+        File file = new File(contextWrap.getActivity().getCacheDir().getAbsolutePath() + "/user/avatar.jpg");
         
-        File file = new File(contextWrap.getActivity().getExternalCacheDir().getAbsolutePath() + "/user/avatar.jpg");
-        if (file.exists()) {
-            file.delete();
-        }
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
-        /*File path = new File(contextWrap.getActivity().getFilesDir().getAbsolutePath(), "user");
-        
-        if (!path.exists() || !path.isDirectory()) {
-            path.mkdirs();
-        }*/
         return file;
         
     }

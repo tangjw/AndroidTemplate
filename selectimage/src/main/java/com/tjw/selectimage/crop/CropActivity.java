@@ -63,8 +63,10 @@ public class CropActivity extends AppCompatActivity {
     }
     
     public void save(View view) {
-        
-        writeToFile(mClipImageLayout.clip());
+    
+        int rawImageX = getIntent().getIntExtra("outImageX", 640);
+        int rawImageY = getIntent().getIntExtra("outImageY", 640);
+        writeToFile(mClipImageLayout.clip(rawImageX, rawImageY));
         Intent data = new Intent();
         setResult(Activity.RESULT_OK, data);
         finish();

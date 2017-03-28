@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -16,14 +17,14 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
+
 
 /**
  * http://blog.csdn.net/lmj623565791/article/details/39761281
  *
  * @author zhy
  */
-public class ClipZoomImageView extends ImageView implements
+public class ClipZoomImageView extends AppCompatImageView implements
         OnScaleGestureListener, OnTouchListener,
         ViewTreeObserver.OnGlobalLayoutListener {
     
@@ -361,16 +362,30 @@ public class ClipZoomImageView extends ImageView implements
     /**
      * 剪切图片，返回剪切后的bitmap对象
      *
+     * @param outImageX
+     * @param outImageY
      * @return
      */
-    public Bitmap clip() {
+    public Bitmap clip(int outImageX, int outImageY) {
         Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(),
                 Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
         draw(canvas);
+    
+        int width = getWidth() - 2 * mHorizontalPadding;
+    
+        // 创建操作图片用的matrix对象  
+        Matrix matrix = new Matrix();
+        // 计算宽高缩放率  
+        float scaleWidth = ((float) outImageX) / width;
+        float scaleHeight = ((float) outImageY) / width;
+        // 缩放图片动作  
+        matrix.postScale(scaleWidth, scaleHeight);
+
+
         return Bitmap.createBitmap(bitmap, mHorizontalPadding,
-                mVerticalPadding, getWidth() - 2 * mHorizontalPadding,
-                getWidth() - 2 * mHorizontalPadding);
+                mVerticalPadding, width,
+                width, matrix, true);
     }
     
     /**

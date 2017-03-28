@@ -12,7 +12,6 @@ import com.bumptech.glide.signature.StringSignature;
 import com.orhanobut.logger.Logger;
 import com.tjw.selectimage.app.SelectImage;
 import com.tjw.selectimage.app.SelectImageImpl;
-import com.tjw.selectimage.crop.CropActivity;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.InvokeParam;
 import com.tjw.selectimage.model.TContextWrap;
@@ -132,7 +131,7 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         CropOptions.Builder builder = new CropOptions.Builder();
         builder.setOutputX(640).setOutputY(640);
         builder.setAspectX(1).setAspectY(1);
-        builder.setWithOwnCrop(false);
+        builder.setWithSystemCrop(false);
         return builder.create();
     }
     
@@ -145,9 +144,4 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         mTakePhoto.fromAlbum(9);
     }
     
-    public void setLauncherIconBadgeNumber(View view) {
-//        LauncherIconUtils.sendBadgeNumber(this,"100");
-        startActivity(new Intent(this, CropActivity.class));
-        
-    }
 }

@@ -8,10 +8,8 @@ import java.io.Serializable;
  * Date: 2016/7/27 13:19
  */
 public class CropOptions implements Serializable {
-    /**
-     * 使用TakePhoto自带的裁切工具进行裁切
-     */
-    private boolean withOwnCrop;
+    
+    private boolean withSystemCrop;
     private int aspectX;
     private int aspectY;
     private int outputX;
@@ -52,12 +50,12 @@ public class CropOptions implements Serializable {
         this.outputY = outputY;
     }
     
-    public boolean isWithOwnCrop() {
-        return withOwnCrop;
+    public boolean isWithSystemCrop() {
+        return withSystemCrop;
     }
     
-    public void setWithOwnCrop(boolean withOwnCrop) {
-        this.withOwnCrop = withOwnCrop;
+    public void setWithSystemCrop(boolean withOwnCrop) {
+        this.withSystemCrop = withOwnCrop;
     }
     
     public static class Builder {
@@ -86,9 +84,15 @@ public class CropOptions implements Serializable {
             options.setOutputY(outputY);
             return this;
         }
-        
-        public Builder setWithOwnCrop(boolean withOwnCrop) {
-            options.setWithOwnCrop(withOwnCrop);
+    
+        /**
+         * 设置是否用系统自带的剪裁
+         *
+         * @param withOwnCrop
+         * @return
+         */
+        public Builder setWithSystemCrop(boolean withOwnCrop) {
+            options.setWithSystemCrop(withOwnCrop);
             return this;
         }
         
