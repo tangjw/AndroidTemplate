@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -22,7 +26,10 @@ import com.tjw.selectimage.permission.PermissionManager;
 import com.tjw.selectimage.permission.TakePhotoInvocationHandler;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseActivity;
+import com.tjw.template.util.ViewHolder;
+import com.tjw.template.widget.RatioImageView;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -36,17 +43,22 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
     
     private InvokeParam mInvokeParam;
     
-    private SelectImage mTakePhoto;
+    private SelectImage mSelectImage;
+    private GridView mGridView;
+    
+    private MyAdapter2 mAdapter;
+    
+    private ArrayList<TImage> mSelectedImage2s;
     
     @Override
     protected void beforeSuperCreate(@Nullable Bundle savedInstanceState) {
         super.beforeSuperCreate(savedInstanceState);
-        getTakePhoto().onCreate(savedInstanceState);
+        getSelectImage().onCreate(savedInstanceState);
     }
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        getTakePhoto().onSaveInstanceState(outState);
+        getSelectImage().onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
     
@@ -54,12 +66,18 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
     protected void initView(Bundle savedInstanceState) {
         setContentView(R.layout.activity_camera);
         mImageView = (ImageView) findViewById(R.id.imageView);
-        
+        mGridView = (GridView) findViewById(R.id.gv_img);
+        mSelectedImage2s = new ArrayList<>();
+    
+        mAdapter = new MyAdapter2();
+    
+        mGridView.setAdapter(mAdapter);
+    
     }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        getTakePhoto().onActivityResult(requestCode, resultCode, data);
+        getSelectImage().onActivityResult(requestCode, resultCode, data);
     }
     
     
@@ -68,15 +86,6 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         PermissionManager.TPermissionType type = PermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
         PermissionManager.handlePermissionsResult(this, type, mInvokeParam, this);
-    }
-    
-    public void openCamera(View view) {
-        mTakePhoto.fromCamera(getCropOptions());
-    }
-    
-    public void openAlbum(View view) {
-        mTakePhoto.fromAlbum(getCropOptions());
-        
     }
     
     @Override
@@ -88,7 +97,12 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
                 .error(R.drawable.ic_mine)
                 .into(mImageView);
     
+        mSelectedImage2s.addAll(result.getImages());
     
+    
+        mAdapter.setSelectedImgList(mSelectedImage2s);
+        
+        
         for (TImage img : result.getImages()) {
             System.out.println(img.getOriginalPath());
         }
@@ -117,11 +131,11 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
     /**
      * 获取TakePhoto实例
      */
-    public SelectImage getTakePhoto() {
-        if (mTakePhoto == null) {
-            mTakePhoto = (SelectImage) TakePhotoInvocationHandler.of(this).bind(new SelectImageImpl(this, this));
+    public SelectImage getSelectImage() {
+        if (mSelectImage == null) {
+            mSelectImage = (SelectImage) TakePhotoInvocationHandler.of(this).bind(new SelectImageImpl(this, this));
         }
-        return mTakePhoto;
+        return mSelectImage;
     }
     
     /**
@@ -135,13 +149,119 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         return builder.create();
     }
     
-    
-    public void open1(View view) {
-        mTakePhoto.fromCamera();
+    public void setAvatar(View view) {
+        
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.dialog_select_image);
+        
+        bottomSheetDialog.show();
+        
+        bottomSheetDialog.findViewById(R.id.tv_select_image_cancel)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        bottomSheetDialog.cancel();
+                    }
+                });
+        
+        bottomSheetDialog.findViewById(R.id.tv_select_image_album)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mSelectImage.fromAlbum(getCropOptions());
+                        bottomSheetDialog.cancel();
+                    }
+                });
+        
+        bottomSheetDialog.findViewById(R.id.tv_select_image_camera)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mSelectImage.fromCamera(getCropOptions());
+                        bottomSheetDialog.cancel();
+                    }
+                });
     }
     
-    public void open2(View view) {
-        mTakePhoto.fromAlbum(9);
+    
+    private class MyAdapter2 extends BaseAdapter {
+        
+        private ArrayList<TImage> mSelectedImgList;
+        
+        public MyAdapter2() {
+            mSelectedImgList = new ArrayList<>();
+        }
+        
+        public void setSelectedImgList(ArrayList<TImage> selectedImgList) {
+            mSelectedImgList = selectedImgList;
+            notifyDataSetChanged();
+        }
+        
+        public ArrayList<TImage> getSelectedImgList() {
+            return mSelectedImgList;
+        }
+        
+        @Override
+        public int getCount() {
+            return mSelectedImgList.size() == 9 ? 9 : mSelectedImgList.size() + 1;
+        }
+        
+        @Override
+        public String getItem(int position) {
+            return null;
+        }
+        
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = View.inflate(CameraActivity2.this, R.layout.item_img, null);
+            }
+            RatioImageView img = ViewHolder.get(convertView, R.id.siv_img);
+            ImageView del = ViewHolder.get(convertView, R.id.iv_close);
+            
+            del.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mSelectedImgList.remove(position);
+                    notifyDataSetChanged();
+                }
+            });
+            
+            if (mSelectedImgList.size() > 0 && position < mSelectedImgList.size()) {
+                Glide.with(CameraActivity2.this)
+                        .load(mSelectedImgList.get(mSelectedImgList.size() - 1 - position).getOriginalPath())
+                        .into(img);
+                del.setVisibility(View.VISIBLE);
+                img.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+//                        previewImage(position);
+                    }
+                });
+            } else if (position == mSelectedImgList.size()) {
+                Glide.with(CameraActivity2.this)
+                        .load(R.drawable.compose_pic_add_highlighted)
+                        .into(img);
+                del.setVisibility(View.GONE);
+                img.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        pickImage();
+                    }
+                });
+            }
+            return convertView;
+        }
     }
+    
+    private void pickImage() {
+        mSelectImage.fromAlbum(9 - mSelectedImage2s.size());
+    }
+    
     
 }

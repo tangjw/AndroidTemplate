@@ -43,11 +43,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class ImageSelectActivity extends HelperActivity {
-    private ArrayList<Image> images;
-    private LongSparseArray<Image> allImages;
-    private String album;
+    /**
+     * 所有的图片 SparseArray id为key
+     */
+    private ArrayList<Image> mAllImageList;
     
-    private ArrayList<Album> albums;
+    /**
+     * 所有的图片 SparseArray id为key
+     */
+    private LongSparseArray<Image> mAllImages;
+    
+    /**
+     * 当前选中的相册名,默认为空
+     */
+    private String mSelectedAlbumName;
+    
+    private ArrayList<Album> mAllAlbumList;
     
     private TextView errorDisplay;
     
@@ -98,14 +109,14 @@ public class ImageSelectActivity extends HelperActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         
         setToolbar();
-        allImages = new LongSparseArray<>();
+        mAllImages = new LongSparseArray<>();
         mSelectImages = new ArrayList<>();
         
         
         Intent intent = getIntent();
         Constants.limit = intent.getIntExtra(Constants.INTENT_EXTRA_LIMIT, 0);
-        
-        album = intent.getStringExtra(Constants.INTENT_EXTRA_ALBUM);
+    
+        mSelectedAlbumName = intent.getStringExtra(Constants.INTENT_EXTRA_ALBUM);
         
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -120,6 +131,7 @@ public class ImageSelectActivity extends HelperActivity {
         });
         
         setClickListener();
+    
     }
     
     private void setClickListener() {
@@ -133,7 +145,7 @@ public class ImageSelectActivity extends HelperActivity {
         mTvAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (albums != null && albums.size() > 0) {
+                if (mAllAlbumList != null && mAllAlbumList.size() > 0) {
                     mListPopupWindow.show();
                 }
             }
@@ -144,18 +156,21 @@ public class ImageSelectActivity extends HelperActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
                 mCurrentSelectedAlbum = position;
-                
-                for (int i = 0; i < albums.size(); i++) {
-                    albums.get(i).setSelected(i == position);
+    
+                for (int i = 0; i < mAllAlbumList.size(); i++) {
+                    mAllAlbumList.get(i).setSelected(i == position);
                 }
+    
                 mAlbumSelectAdapter.notifyDataSetChanged();
+    
                 mListPopupWindow.dismiss();
+    
                 if (position != 0) {
-                    
-                    album = albums.get(position).getName();
-                    mToolbar.setTitle(album);
+        
+                    mSelectedAlbumName = mAllAlbumList.get(position).getName();
+                    mToolbar.setTitle(mSelectedAlbumName);
                 } else {
-                    album = null;
+                    mSelectedAlbumName = null;
                     mToolbar.setTitle("所有图片");
                 }
                 loadImages();
@@ -195,9 +210,9 @@ public class ImageSelectActivity extends HelperActivity {
                         break;
                     }
                     case Constants.ALBUM_FETCH_COMPLETED: {
-                        albums.get(mCurrentSelectedAlbum).setSelected(true);
+                        mAllAlbumList.get(mCurrentSelectedAlbum).setSelected(true);
                         if (mAlbumSelectAdapter == null) {
-                            mAlbumSelectAdapter = new AlbumSelectAdapter(albums);
+                            mAlbumSelectAdapter = new AlbumSelectAdapter(mAllAlbumList);
                             mListPopupWindow.setAdapter(mAlbumSelectAdapter);
                         } else {
                             mAlbumSelectAdapter.notifyDataSetChanged();
@@ -208,14 +223,14 @@ public class ImageSelectActivity extends HelperActivity {
                     case Constants.FETCH_COMPLETED: {
                         
                         /*
-                        If adapter is null, this implies that the loaded images will be shown
+                        If adapter is null, this implies that the loaded mAllImageList will be shown
                         for the first time, hence send FETCH_COMPLETED message.
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
                         
                         if (adapter == null) {
-                            adapter = new CustomImageSelectAdapter(getApplicationContext(), images);
+                            adapter = new CustomImageSelectAdapter(getApplicationContext(), mAllImageList);
                             gridView.setAdapter(adapter);
                             
                             progressBar.setVisibility(View.INVISIBLE);
@@ -275,8 +290,8 @@ public class ImageSelectActivity extends HelperActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
-        images = null;
+    
+        mAllImageList = null;
         if (adapter != null) {
             adapter.releaseResources();
         }
@@ -315,8 +330,8 @@ public class ImageSelectActivity extends HelperActivity {
     private void toggleSelection(int position) {
         
         if (1 == Constants.limit) {
-            images.get(position).isSelected = !images.get(position).isSelected;
-            if (images.get(position).isSelected) {
+            mAllImageList.get(position).isSelected = !mAllImageList.get(position).isSelected;
+            if (mAllImageList.get(position).isSelected) {
                 countSelected++;
             } else {
                 countSelected--;
@@ -324,9 +339,9 @@ public class ImageSelectActivity extends HelperActivity {
             sendIntent();
             return;
         }
-        
-        
-        if (!images.get(position).isSelected && countSelected >= Constants.limit) {
+    
+    
+        if (!mAllImageList.get(position).isSelected && countSelected >= Constants.limit) {
             Toast.makeText(
                     getApplicationContext(),
                     String.format(getString(R.string.limit_exceeded), Constants.limit),
@@ -334,15 +349,15 @@ public class ImageSelectActivity extends HelperActivity {
                     .show();
             return;
         }
-        
-        
-        images.get(position).isSelected = !images.get(position).isSelected;
-        allImages.put(images.get(position).id, images.get(position));
-        if (images.get(position).isSelected) {
+    
+    
+        mAllImageList.get(position).isSelected = !mAllImageList.get(position).isSelected;
+        mAllImages.put(mAllImageList.get(position).id, mAllImageList.get(position));
+        if (mAllImageList.get(position).isSelected) {
             countSelected++;
-            mSelectImages.add(images.get(position).id);
+            mSelectImages.add(mAllImageList.get(position).id);
         } else {
-            mSelectImages.remove(images.get(position).id);
+            mSelectImages.remove(mAllImageList.get(position).id);
             countSelected--;
         }
         adapter.notifyDataSetChanged();
@@ -366,32 +381,32 @@ public class ImageSelectActivity extends HelperActivity {
     }
     
     private void unselectAll() {
-        for (int i = 0, l = images.size(); i < l; i++) {
-            images.get(i).isSelected = false;
+        for (int i = 0, l = mAllImageList.size(); i < l; i++) {
+            mAllImageList.get(i).isSelected = false;
         }
         countSelected = 0;
         adapter.notifyDataSetChanged();
     }
     
     public void setImageSelect(long id, boolean isChecked) {
-        
-        if (isChecked && !allImages.get(id).isSelected) {
+    
+        if (isChecked && !mAllImages.get(id).isSelected) {
             countSelected++;
             mSelectImages.add(id);
-            allImages.get(id).isSelected = true;
-            for (Image image : images) {
+            mAllImages.get(id).isSelected = true;
+            for (Image image : mAllImageList) {
                 if (image.id == id) {
                     image.isSelected = true;
                 }
             }
             adapter.notifyDataSetChanged();
             setActionBarText();
-        } else if (!isChecked && allImages.get(id).isSelected) {
+        } else if (!isChecked && mAllImages.get(id).isSelected) {
             mSelectImages.remove(id);
             countSelected--;
-            allImages.get(id).isSelected = false;
-            
-            for (Image image : images) {
+            mAllImages.get(id).isSelected = false;
+        
+            for (Image image : mAllImageList) {
                 if (image.id == id) {
                     image.isSelected = false;
                 }
@@ -407,9 +422,9 @@ public class ImageSelectActivity extends HelperActivity {
     
     private ArrayList<Image> getSelected() {
         ArrayList<Image> selectedImages = new ArrayList<>();
-        
-        for (int i = 0, nsize = allImages.size(); i < nsize; i++) {
-            Image obj = allImages.valueAt(i);
+    
+        for (int i = 0, nsize = mAllImages.size(); i < nsize; i++) {
+            Image obj = mAllImages.valueAt(i);
             if (obj.isSelected) {
                 selectedImages.add(obj);
             }
@@ -426,7 +441,6 @@ public class ImageSelectActivity extends HelperActivity {
     }
     
     private void loadImages() {
-        
         startThread(new ImageLoaderRunnable());
     }
     
@@ -437,7 +451,7 @@ public class ImageSelectActivity extends HelperActivity {
             /*
             If the adapter is null, this is first time this activity's view is
             being shown, hence send FETCH_STARTED message to show progress bar
-            while images are loaded from phone
+            while mAllImageList are loaded from phone
              */
             if (adapter == null) {
                 sendMessage(Constants.FETCH_STARTED);
@@ -445,10 +459,10 @@ public class ImageSelectActivity extends HelperActivity {
             
             File file;
             HashSet<Long> selectedImages = new HashSet<>();
-            if (images != null) {
+            if (mAllImageList != null) {
                 Image image;
-                for (int i = 0, l = images.size(); i < l; i++) {
-                    image = images.get(i);
+                for (int i = 0, l = mAllImageList.size(); i < l; i++) {
+                    image = mAllImageList.get(i);
                     file = new File(image.path);
                     if (file.exists() && image.isSelected) {
                         selectedImages.add(image.id);
@@ -458,14 +472,15 @@ public class ImageSelectActivity extends HelperActivity {
             
             
             Cursor cursor;
-            boolean isAllAlbum = TextUtils.isEmpty(album);
+            boolean isAllAlbum = TextUtils.isEmpty(mSelectedAlbumName);
             if (isAllAlbum) {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Images.Media.DATE_ADDED);
                 
             } else {
                 cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
+                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{mSelectedAlbumName},
+                        MediaStore.Images.Media.DATE_ADDED);
             }
             
             if (cursor == null) {
@@ -476,11 +491,11 @@ public class ImageSelectActivity extends HelperActivity {
             /*
             In case this runnable is executed to onChange calling loadImages,
             using countSelected variable can result in a race condition. To avoid that,
-            tempCountSelected keeps track of number of selected images. On handling
+            tempCountSelected keeps track of number of selected mAllImageList. On handling
             FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
              */
             int tempCountSelected = 0;
-            ArrayList<Image> temp = new ArrayList<>(cursor.getCount());
+            ArrayList<Image> temp = new ArrayList<>();
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
@@ -500,20 +515,20 @@ public class ImageSelectActivity extends HelperActivity {
                     if (file.exists()) {
                         Image image = new Image(id, name, path, isSelected);
                         temp.add(image);
-                        allImages.put(id, image);
+                        mAllImages.put(id, image);
                         
                     }
                     
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
-            
-            
-            if (images == null) {
-                images = new ArrayList<>();
+    
+    
+            if (mAllImageList == null) {
+                mAllImageList = new ArrayList<>();
             }
-            images.clear();
-            images.addAll(temp);
+            mAllImageList.clear();
+            mAllImageList.addAll(temp);
             
             
             sendMessage(Constants.FETCH_COMPLETED, tempCountSelected);
@@ -556,7 +571,7 @@ public class ImageSelectActivity extends HelperActivity {
             
             
             ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
-//            HashSet<Long> albumSet = new HashSet<>();
+
             
             HashMap<Long, Integer> albumMap = new HashMap<>();
             
@@ -574,16 +589,6 @@ public class ImageSelectActivity extends HelperActivity {
                     String image = cursor.getString(cursor.getColumnIndex(projection2[2]));
     
     
-                    /*Cursor cursor1 = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                            MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
-                    if (cursor1 == null) {
-                        sendMessage(Constants.ERROR);
-                        return;
-                    }
-                    
-                    int count = cursor1.getCount();
-                    
-                    cursor1.close();*/
                     
                     if (!albumMap.containsKey(albumId)) {
                         file = new File(image);
@@ -595,21 +600,8 @@ public class ImageSelectActivity extends HelperActivity {
                         Album album1 = temp.get(albumMap.get(albumId));
                         album1.setCount(album1.getCount() + 1);
                     }
-                    
-                    /*if (!albumSet.contains(albumId)) {
-                        *//*
-                        It may happen that some image file paths are still present in cache,
-                        though image file does not exist. These last as long as media
-                        scanner is not run again. To avoid get such image file paths, check
-                        if image file exists.
-                         *//*
-                        file = new File(image);
-                        if (file.exists()) {
-                            temp.add(new Album(album, image, 1));
-                            albumSet.add(albumId);
-                        }
-                    }*/
-                    
+    
+    
                 } while (cursor.moveToPrevious());
             }
             if (temp.size() == 0) {
@@ -620,15 +612,15 @@ public class ImageSelectActivity extends HelperActivity {
             Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
             
             cursor.close();
-            
-            if (albums == null) {
-                albums = new ArrayList<>();
+    
+            if (mAllAlbumList == null) {
+                mAllAlbumList = new ArrayList<>();
             }
-            albums.clear();
-//            albums.add(all);
-            albums.add(allalbum);
-            
-            albums.addAll(temp);
+            mAllAlbumList.clear();
+//            mAllAlbumList.add(all);
+            mAllAlbumList.add(allalbum);
+    
+            mAllAlbumList.addAll(temp);
             
             sendMessage(Constants.ALBUM_FETCH_COMPLETED);
         }

@@ -1,62 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:gravity="center_horizontal"
-              android:background="#FFF"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
-    
+              android:layout_height="match_parent"
+              android:background="@android:color/white"
+              android:orientation="vertical">
+
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
-        android:background="@color/colorPrimary"
-        android:layout_height="48dp">
-        
+        android:layout_height="48dp"
+        android:background="@color/colorPrimary">
+
     </android.support.v7.widget.Toolbar>
+
 
     <ImageView
         android:id="@+id/imageView"
-        android:background="@color/colorAccent"
         android:layout_width="120dp"
-        android:padding="1px"
         android:layout_height="120dp"
-        android:layout_marginTop="30dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="30dp"
+        android:background="@color/colorAccent"
+        android:onClick="setAvatar"
+        android:padding="1px"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_mine"/>
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:onClick="openCamera"
-        android:text="拍照"
-        android:textAllCaps="false"/>
 
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
+    <GridView
+        android:id="@+id/gv_img"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="openAlbum"
-        android:text="相册"
-        android:textAllCaps="false"/>
+        android:layout_marginEnd="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginStart="12dp"
+        android:horizontalSpacing="5dp"
+        android:numColumns="3"
+        android:scrollbars="none"
+        android:verticalSpacing="5dp">
+    </GridView>
 
-    <Button
-        android:id="@+id/button6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="open1"
-        android:text="拍照不剪裁"
-        android:textAllCaps="false"/>
-
-    <Button
-        android:id="@+id/button7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="open2"
-        android:text="相册多选"
-        android:textAllCaps="false"/>
 
 </LinearLayout>

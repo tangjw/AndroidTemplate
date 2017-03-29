@@ -12,5 +12,9 @@
         <attr name="circle_indicator_space" format="dimension"/>
         <attr name="circle_indicator_indicator_radius" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="RatioImageView">
+        <attr name="ratioImageView" format="float"/>
+    </declare-styleable>
     
 </resources>
