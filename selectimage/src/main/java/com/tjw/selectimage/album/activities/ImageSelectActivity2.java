@@ -12,7 +12,9 @@ import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.util.LongSparseArray;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.ListPopupWindow;
@@ -38,6 +40,7 @@ import com.tjw.selectimage.album.adapters.CustomImageSelectAdapter;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.album.models.Album;
 import com.tjw.selectimage.album.models.Image;
+import com.tjw.selectimage.uitl.L;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -47,7 +50,10 @@ import java.util.HashSet;
 
 import static com.tjw.selectimage.album.helpers.Constants.PERMISSION_GRANTED;
 
-public class ImageSelectActivity extends HelperActivity {
+public class ImageSelectActivity2 extends HelperActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String ALBUM_NAME = "albumName";
+    private static final int IMAGE_ALL = 0;
+    private static final int IMAGE_ALBUM = 1;
     private final String[] projection = new String[]{
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DISPLAY_NAME,
@@ -108,7 +114,7 @@ public class ImageSelectActivity extends HelperActivity {
         
         Intent intent = getIntent();
         Constants.limit = intent.getIntExtra(Constants.INTENT_EXTRA_LIMIT, 0);
-    
+        
         mSelectedAlbumName = intent.getStringExtra(Constants.INTENT_EXTRA_ALBUM);
         
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
@@ -124,12 +130,12 @@ public class ImageSelectActivity extends HelperActivity {
         });
         
         setClickListener();
-    
+        
     }
     
     private void setClickListener() {
         
-        mListPopupWindow = new ListPopupWindow(ImageSelectActivity.this);
+        mListPopupWindow = new ListPopupWindow(ImageSelectActivity2.this);
         mListPopupWindow.setAnchorView(mBottomToolBar);
         mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
         mListPopupWindow.setHeight(ListPopupWindow.WRAP_CONTENT);
@@ -149,17 +155,17 @@ public class ImageSelectActivity extends HelperActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
                 mCurrentSelectedAlbum = position;
-    
+                
                 for (int i = 0; i < mAllAlbumList.size(); i++) {
                     mAllAlbumList.get(i).setSelected(i == position);
                 }
-    
+                
                 mAlbumSelectAdapter.notifyDataSetChanged();
-    
+                
                 mListPopupWindow.dismiss();
-    
+                
                 if (position != 0) {
-        
+                    
                     mSelectedAlbumName = mAllAlbumList.get(position).getName();
                     mToolbar.setTitle(mSelectedAlbumName);
                 } else {
@@ -242,7 +248,7 @@ public class ImageSelectActivity extends HelperActivity {
                     }
                     case Constants.EMPTY: {
                         progressBar.setVisibility(View.INVISIBLE);
-                        Toast.makeText(ImageSelectActivity.this, "没有图片", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ImageSelectActivity2.this, "没有图片", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     
@@ -264,22 +270,73 @@ public class ImageSelectActivity extends HelperActivity {
         checkPermission();
     }
     
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        CursorLoader imageLoader = null;
+        switch (id) {
+            case IMAGE_ALL:
+                imageLoader = new CursorLoader(
+                        this,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        null,
+                        null,
+                        MediaStore.Images.Media.DATE_ADDED);
+                break;
+            case IMAGE_ALBUM:
+                imageLoader = new CursorLoader(
+                        this,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?",
+                        new String[]{args.getString(ALBUM_NAME)},
+                        MediaStore.Images.Media.DATE_ADDED);
+                break;
+            
+        }
+        return imageLoader;
+    }
+    
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null) {
+            L.e("data 为 null");
+            return;
+        }
+        //-------这里按照时间添加的倒序排序!!!!!!!--------
+        LongSparseArray<Image> allImages = new LongSparseArray<>();
+        
+        do {
+            long img_id = data.getLong(data.getColumnIndex(projection[0]));
+            String img_name = data.getString(data.getColumnIndex(projection[1]));
+            String img_path = data.getString(data.getColumnIndex(projection[2]));
+            allImages.put(img_id, new Image(img_id, img_name, img_path, false));
+            
+        } while (data.moveToPrevious());
+        
+        /*long key = 0;
+        for (int i = 0; i < allImages.size(); i++) {
+            key = allImages.keyAt(i);
+            Object obj = allImages.get(key);
+        }*/
+        
+    }
+    
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        
+    }
+    
     /**
      * 根据相册名加载图片
      *
      * @param albumName null加载所有图片
      */
     private void loadImages(@Nullable String albumName) {
-        CursorLoader imageLoader = new CursorLoader(
-                this,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                null,
-                null,
-                MediaStore.Images.Media.DATE_ADDED);
-        
-        imageLoader.loadInBackground();
-        
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Bundle args = new Bundle();
+        args.putString(ALBUM_NAME, albumName);
+        loaderManager.initLoader(TextUtils.isEmpty(albumName) ? IMAGE_ALL : IMAGE_ALBUM, args, this);
     }
     
     @Override
@@ -301,7 +358,7 @@ public class ImageSelectActivity extends HelperActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    
+        
         mAllImageList = null;
         if (adapter != null) {
             adapter.releaseResources();
@@ -349,8 +406,8 @@ public class ImageSelectActivity extends HelperActivity {
             sendIntent();
             return;
         }
-    
-    
+        
+        
         if (!mAllImageList.get(position).isSelected && countSelected >= Constants.limit) {
             Toast.makeText(
                     getApplicationContext(),
@@ -359,8 +416,8 @@ public class ImageSelectActivity extends HelperActivity {
                     .show();
             return;
         }
-    
-    
+        
+        
         mAllImageList.get(position).isSelected = !mAllImageList.get(position).isSelected;
         mAllImages.put(mAllImageList.get(position).id, mAllImageList.get(position));
         if (mAllImageList.get(position).isSelected) {
@@ -398,7 +455,7 @@ public class ImageSelectActivity extends HelperActivity {
     }
     
     public void setImageSelect(long id, boolean isChecked) {
-    
+        
         if (isChecked && !mAllImages.get(id).isSelected) {
             countSelected++;
             mSelectImages.add(id);
@@ -414,7 +471,7 @@ public class ImageSelectActivity extends HelperActivity {
             mSelectImages.remove(id);
             countSelected--;
             mAllImages.get(id).isSelected = false;
-        
+            
             for (Image image : mAllImageList) {
                 if (image.id == id) {
                     image.isSelected = false;
@@ -431,7 +488,7 @@ public class ImageSelectActivity extends HelperActivity {
     
     private ArrayList<Image> getSelected() {
         ArrayList<Image> selectedImages = new ArrayList<>();
-    
+        
         for (int i = 0, nsize = mAllImages.size(); i < nsize; i++) {
             Image obj = mAllImages.valueAt(i);
             if (obj.isSelected) {
@@ -567,15 +624,15 @@ public class ImageSelectActivity extends HelperActivity {
     
     private static class MyHandler extends Handler {
         
-        private WeakReference<ImageSelectActivity> mActivityWeakReference;
+        private WeakReference<ImageSelectActivity2> mActivityWeakReference;
         
-        MyHandler(ImageSelectActivity activity) {
+        MyHandler(ImageSelectActivity2 activity) {
             mActivityWeakReference = new WeakReference<>(activity);
         }
         
         @Override
         public void handleMessage(Message msg) {
-            ImageSelectActivity activity = mActivityWeakReference.get();
+            ImageSelectActivity2 activity = mActivityWeakReference.get();
             if (activity == null) return;
             switch (msg.what) {
                 case PERMISSION_GRANTED: //权限允许
@@ -665,8 +722,8 @@ public class ImageSelectActivity extends HelperActivity {
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
-    
-    
+            
+            
             if (mAllImageList == null) {
                 mAllImageList = new ArrayList<>();
             }
@@ -700,8 +757,8 @@ public class ImageSelectActivity extends HelperActivity {
             
             
             ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
-    
-    
+            
+            
             HashMap<Long, Integer> albumMap = new HashMap<>();
             
             File file;
@@ -716,8 +773,8 @@ public class ImageSelectActivity extends HelperActivity {
                     long albumId = cursor.getLong(cursor.getColumnIndex(projection2[0]));
                     String album = cursor.getString(cursor.getColumnIndex(projection2[1]));
                     String image = cursor.getString(cursor.getColumnIndex(projection2[2]));
-    
-    
+                    
+                    
                     if (!albumMap.containsKey(albumId)) {
                         file = new File(image);
                         if (file.exists()) {
@@ -728,8 +785,8 @@ public class ImageSelectActivity extends HelperActivity {
                         Album album1 = temp.get(albumMap.get(albumId));
                         album1.setCount(album1.getCount() + 1);
                     }
-    
-    
+                    
+                    
                 } while (cursor.moveToPrevious());
             }
             if (temp.size() == 0) {
@@ -740,14 +797,14 @@ public class ImageSelectActivity extends HelperActivity {
             Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
             
             cursor.close();
-    
+            
             if (mAllAlbumList == null) {
                 mAllAlbumList = new ArrayList<>();
             }
             mAllAlbumList.clear();
 //            mAllAlbumList.add(all);
             mAllAlbumList.add(allalbum);
-    
+            
             mAllAlbumList.addAll(temp);
             
             sendMessage(Constants.ALBUM_FETCH_COMPLETED);
