@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.tjw.selectimage.album.activities.ImageSelectActivity;
+import com.tjw.selectimage.album.activities.ImageSelectActivity2;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.TContextWrap;
@@ -26,13 +26,8 @@ public class IntentUtils {
      * @param limit 最多选择图片张数的限制
      */
     public static Intent getPickMultipleIntent(TContextWrap contextWrap, int limit) {
-//        Intent intent = new Intent(contextWrap.getActivity(), AlbumSelectActivity.class);
-//        intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit>0? limit:1);
-        
-        
-        Intent intent = new Intent(contextWrap.getActivity(), ImageSelectActivity.class);
-        intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit > 0 ? limit : 1);
-        return intent;
+        Constants.limit = limit;
+        return new Intent(contextWrap.getActivity(), ImageSelectActivity2.class);
     }
     
     /**

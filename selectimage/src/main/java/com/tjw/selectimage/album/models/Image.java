@@ -29,6 +29,7 @@ public class Image implements Parcelable {
         dest.writeLong(id);
         dest.writeString(name);
         dest.writeString(path);
+        dest.writeByte((byte) (isSelected ? 1 : 0));
     }
     
     public static final Creator<Image> CREATOR = new Creator<Image>() {
@@ -47,5 +48,6 @@ public class Image implements Parcelable {
         id = in.readLong();
         name = in.readString();
         path = in.readString();
+        isSelected = in.readByte() != 0;
     }
 }

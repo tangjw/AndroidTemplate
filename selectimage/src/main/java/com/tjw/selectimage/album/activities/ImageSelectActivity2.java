@@ -8,8 +8,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Process;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -42,18 +40,18 @@ import com.tjw.selectimage.album.models.Album;
 import com.tjw.selectimage.album.models.Image;
 import com.tjw.selectimage.uitl.L;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static com.tjw.selectimage.album.helpers.Constants.PERMISSION_GRANTED;
-
-public class ImageSelectActivity2 extends HelperActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ImageSelectActivity2 extends HelperActivity
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        ImagePreviewFragment.OnFragmentInteractionListener {
+    
     private static final String ALBUM_NAME = "albumName";
     private static final int IMAGE_ALL = 0;
-    private static final int IMAGE_ALBUM = 1;
+    private static final int ALBUM_ALL = 1;
+    private static final int IMAGE_ALBUM = 2;
     private final String[] projection = new String[]{
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DISPLAY_NAME,
@@ -63,7 +61,7 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.DATA};
     /**
-     * 所有的图片 SparseArray id为key
+     * 所有的图片
      */
     private ArrayList<Image> mAllImageList;
     /**
@@ -71,10 +69,10 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
      */
     private LongSparseArray<Image> mAllImages;
     /**
-     * 当前选中的相册名,默认为空
+     * 当前选中的相册名,默认为 null
      */
     private String mSelectedAlbumName;
-    private ArrayList<Album> mAllAlbumList;
+    private ArrayList<Album> mAllAlbumLists;
     private TextView errorDisplay;
     private ProgressBar progressBar;
     private GridView gridView;
@@ -83,8 +81,6 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
     private int countSelected;
     private ContentObserver observer;
     private Handler handler;
-    private Thread thread;
-    private Thread thread2;
     private Toolbar mToolbar;
     private MenuItem mActionSelectDone;
     private TextView mTvPreview;
@@ -93,35 +89,76 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
     private ListPopupWindow mListPopupWindow;
     private int mCurrentSelectedAlbum;
     private ArrayList<Long> mSelectImages;
+    private ArrayList<Image> mImageList;
+    /**
+     * 全局选中的Image集合
+     */
+    private ArrayList<Image> mSelectedImageList;
+    /**
+     * 全局选中的Image id 集合
+     */
+    private HashSet<Long> mSelectedIdSet;
+    /**
+     * 当前选中Image在当前Album所有Image集合中的位置
+     */
+    private LongSparseArray<Integer> mSparseArray;
+    private ArrayList<Image> mPreviewImages;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    
         setContentView(R.layout.activity_image_select);
-
-//        setView(findViewById(R.id.layout_image_select));
+    
+        initView();
+    
+        initData();
+    
+        setViewActionListener();
+    }
+    
+    /**
+     * 初始化数据, 查询图片相册
+     */
+    private void initData() {
+        mAllImages = new LongSparseArray<>();
+        mSelectImages = new ArrayList<>();
+        mSelectedIdSet = new HashSet<>();
+        mSelectedImageList = new ArrayList<>();
         
+        loadImages(null);
+        loadAlbums();
+    }
+    
+    private void initView() {
         mTvPreview = (TextView) findViewById(R.id.tv_preview);
+        
+        mTvPreview.setVisibility(Constants.isCrop ? View.GONE : View.VISIBLE);
         
         mTvAlbum = (TextView) findViewById(R.id.tv_select_album);
         
         mBottomToolBar = (RelativeLayout) findViewById(R.id.rl_select_album);
         
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        
         setToolbar();
-        mAllImages = new LongSparseArray<>();
-        mSelectImages = new ArrayList<>();
-        
-        
-        Intent intent = getIntent();
-        Constants.limit = intent.getIntExtra(Constants.INTENT_EXTRA_LIMIT, 0);
-        
-        mSelectedAlbumName = intent.getStringExtra(Constants.INTENT_EXTRA_ALBUM);
         
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
         
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_image_select);
         gridView = (GridView) findViewById(R.id.grid_view_image_select);
+        
+        
+        mListPopupWindow = new ListPopupWindow(ImageSelectActivity2.this);
+        mListPopupWindow.setAnchorView(mBottomToolBar);
+        mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
+        mListPopupWindow.setHeight(1000);
+        mListPopupWindow.setModal(true);
+    }
+    
+    private void setViewActionListener() {
+        
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -129,22 +166,10 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
             }
         });
         
-        setClickListener();
-        
-    }
-    
-    private void setClickListener() {
-        
-        mListPopupWindow = new ListPopupWindow(ImageSelectActivity2.this);
-        mListPopupWindow.setAnchorView(mBottomToolBar);
-        mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
-        mListPopupWindow.setHeight(ListPopupWindow.WRAP_CONTENT);
-        mListPopupWindow.setModal(true);
-        
         mTvAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAllAlbumList != null && mAllAlbumList.size() > 0) {
+                if (mAllAlbumLists != null && mAllAlbumLists.size() > 0) {
                     mListPopupWindow.show();
                 }
             }
@@ -153,26 +178,25 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
         mListPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                
-                mCurrentSelectedAlbum = position;
-                
-                for (int i = 0; i < mAllAlbumList.size(); i++) {
-                    mAllAlbumList.get(i).setSelected(i == position);
-                }
+    
+                mAllAlbumLists.get(mCurrentSelectedAlbum).setSelected(false);
+                mAllAlbumLists.get(position).setSelected(true);
                 
                 mAlbumSelectAdapter.notifyDataSetChanged();
                 
                 mListPopupWindow.dismiss();
+    
+                mCurrentSelectedAlbum = position;
                 
                 if (position != 0) {
-                    
-                    mSelectedAlbumName = mAllAlbumList.get(position).getName();
+                    mSelectedAlbumName = mAllAlbumLists.get(position).getName();
                     mToolbar.setTitle(mSelectedAlbumName);
                 } else {
                     mSelectedAlbumName = null;
                     mToolbar.setTitle("所有图片");
                 }
-                loadImages();
+    
+                loadImages(mSelectedAlbumName);
                 
             }
         });
@@ -180,9 +204,16 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
         mTvPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<Image> selected = getSelected();
-                if (selected != null && selected.size() > 0) {
-                    ImagePreviewFragment.newInstance(selected).show(getSupportFragmentManager(), "preview");
+                if (mSelectedImageList != null && mSelectedImageList.size() > 0) {
+                    if (mPreviewImages == null) {
+                        mPreviewImages = new ArrayList<>();
+                    } else {
+                        mPreviewImages.clear();
+                    }
+        
+                    mPreviewImages.addAll(mSelectedImageList);
+        
+                    ImagePreviewFragment.newInstance(mSelectedImageList).show(getSupportFragmentManager(), "preview");
                 }
                 
             }
@@ -192,82 +223,17 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
     @Override
     protected void onStart() {
         super.onStart();
-//        handler = new MyHandler(this);
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case PERMISSION_GRANTED: {
-                        loadAlbums();
-                        loadImages();
-                        break;
-                    }
-                    
-                    case Constants.FETCH_STARTED: {
-//                        progressBar.setVisibility(View.VISIBLE);
-//                        gridView.setVisibility(View.INVISIBLE);
-                        break;
-                    }
-                    case Constants.ALBUM_FETCH_COMPLETED: {
-                        mAllAlbumList.get(mCurrentSelectedAlbum).setSelected(true);
-                        if (mAlbumSelectAdapter == null) {
-                            mAlbumSelectAdapter = new AlbumSelectAdapter(mAllAlbumList);
-                            mListPopupWindow.setAdapter(mAlbumSelectAdapter);
-                        } else {
-                            mAlbumSelectAdapter.notifyDataSetChanged();
-                        }
-                        break;
-                    }
-                    
-                    case Constants.FETCH_COMPLETED: {
-                        
-                        /*
-                        If adapter is null, this implies that the loaded mAllImageList will be shown
-                        for the first time, hence send FETCH_COMPLETED message.
-                        However, if adapter has been initialised, this thread was run either
-                        due to the activity being restarted or content being changed.
-                         */
-                        
-                        if (adapter == null) {
-                            adapter = new CustomImageSelectAdapter(getApplicationContext(), mAllImageList);
-                            gridView.setAdapter(adapter);
-                            
-                            progressBar.setVisibility(View.INVISIBLE);
-                            gridView.setVisibility(View.VISIBLE);
-                            orientationBasedUI(getResources().getConfiguration().orientation);
-                        } else {
-                            adapter.notifyDataSetChanged();
-                        }
-                        break;
-                    }
-                    
-                    case Constants.ERROR: {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        errorDisplay.setVisibility(View.VISIBLE);
-                        break;
-                    }
-                    case Constants.EMPTY: {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        Toast.makeText(ImageSelectActivity2.this, "没有图片", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
-                    
-                    default: {
-                        super.handleMessage(msg);
-                    }
-                }
-            }
-        };
+    
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
                 loadAlbums();
-                loadImages();
+                loadImages(mSelectedAlbumName);
             }
         };
         getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
-        
-        checkPermission();
+
+//        checkPermission();
     }
     
     @Override
@@ -292,25 +258,39 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
                         new String[]{args.getString(ALBUM_NAME)},
                         MediaStore.Images.Media.DATE_ADDED);
                 break;
-            
         }
         return imageLoader;
     }
     
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    
+        L.e("onLoadFinished" + data.getCount());
+        
         if (data == null) {
-            L.e("data 为 null");
+            L.e("Cursor data 为 null");
             return;
         }
         //-------这里按照时间添加的倒序排序!!!!!!!--------
-        LongSparseArray<Image> allImages = new LongSparseArray<>();
+//        LongSparseArray<Image> allImages = new LongSparseArray<>();
+        if (mImageList == null) {
+            mImageList = new ArrayList<>();
+        } else {
+            mImageList.clear();
+        }
+    
+    
+        if (!data.moveToLast()) {
+            L.e("Cursor data 不能已到最后, 即cursor is empty");
+            return;
+        }
         
         do {
             long img_id = data.getLong(data.getColumnIndex(projection[0]));
             String img_name = data.getString(data.getColumnIndex(projection[1]));
             String img_path = data.getString(data.getColumnIndex(projection[2]));
-            allImages.put(img_id, new Image(img_id, img_name, img_path, false));
+//            allImages.put(img_id, new Image(img_id, img_name, img_path, false));
+            mImageList.add(new Image(img_id, img_name, img_path, mSelectedIdSet.contains(img_id)));
             
         } while (data.moveToPrevious());
         
@@ -319,6 +299,26 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
             key = allImages.keyAt(i);
             Object obj = allImages.get(key);
         }*/
+    
+        if (adapter == null) {
+            adapter = new CustomImageSelectAdapter(getApplicationContext(), mImageList);
+            gridView.setAdapter(adapter);
+        } else {
+            L.d("adapter.setArrayList(mImageList);");
+            adapter.setArrayList(mImageList);
+        }
+    
+    
+        progressBar.setVisibility(View.INVISIBLE);
+        gridView.setVisibility(View.VISIBLE);
+        orientationBasedUI(getResources().getConfiguration().orientation);
+    
+        if (mSparseArray == null) {
+            mSparseArray = new LongSparseArray<>();
+        } else {
+            mSparseArray.clear();
+        }
+        
         
     }
     
@@ -333,18 +333,101 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
      * @param albumName null加载所有图片
      */
     private void loadImages(@Nullable String albumName) {
+    
+        L.e("loadImages => " + albumName);
+        
         LoaderManager loaderManager = getSupportLoaderManager();
         Bundle args = new Bundle();
         args.putString(ALBUM_NAME, albumName);
-        loaderManager.initLoader(TextUtils.isEmpty(albumName) ? IMAGE_ALL : IMAGE_ALBUM, args, this);
+        if (TextUtils.isEmpty(albumName)) {
+            loaderManager.initLoader(IMAGE_ALL, args, this);
+        } else {
+            loaderManager.restartLoader(IMAGE_ALBUM, args, this);
+        
+        }
+        
+        
+    }
+    
+    
+    private void loadAlbums() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.initLoader(ALBUM_ALL, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                
+                return new CursorLoader(getApplicationContext(),
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection2, null, null,
+                        MediaStore.Images.Media.DATE_ADDED);
+            }
+            
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                if (data == null) {
+                    L.e("Cursor data 为 null");
+                    return;
+                }
+                
+                if (!data.moveToLast()) {
+                    L.e("Cursor data 不能已到最后, 即cursor is empty");
+                    return;
+                }
+                
+                if (mAllAlbumLists == null) {
+                    mAllAlbumLists = new ArrayList<>();
+                } else {
+                    mAllAlbumLists.clear();
+                }
+                
+                
+                HashMap<Long, Integer> albumIdPositionMap = new HashMap<>();
+                
+                L.i("album count " + data.getCount());
+                
+                int position = 0;
+                
+                ArrayList<Album> tempAlbumList = new ArrayList<>();
+                
+                do {
+                    long albumId = data.getLong(data.getColumnIndex(projection2[0]));
+                    String albumName = data.getString(data.getColumnIndex(projection2[1]));
+                    String albumImage = data.getString(data.getColumnIndex(projection2[2]));
+                    
+                    if (albumIdPositionMap.containsKey(albumId)) {
+                        Album album = tempAlbumList.get(albumIdPositionMap.get(albumId));
+                        album.setCount(album.getCount() + 1);
+                    } else {
+                        tempAlbumList.add(new Album(albumName, albumImage, 1, false));
+                        albumIdPositionMap.put(albumId, position++);
+                    }
+                    
+                } while (data.moveToPrevious());
+                
+                mAllAlbumLists.add(new Album("所有图片", tempAlbumList.get(0).getCover(), data.getCount(), false));
+                mAllAlbumLists.addAll(tempAlbumList);
+                
+                
+                mAllAlbumLists.get(mCurrentSelectedAlbum).setSelected(true);
+                if (mAlbumSelectAdapter == null) {
+                    mAlbumSelectAdapter = new AlbumSelectAdapter(mAllAlbumLists);
+                    mListPopupWindow.setAdapter(mAlbumSelectAdapter);
+                } else {
+                    mAlbumSelectAdapter.setAlbums(mAllAlbumLists);
+                }
+                
+            }
+            
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+                
+            }
+        });
     }
     
     @Override
     protected void onStop() {
         super.onStop();
-        
-        stopThread();
-        stopThread2();
         
         getContentResolver().unregisterContentObserver(observer);
         observer = null;
@@ -386,29 +469,25 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (Constants.limit > 1) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.menu_select_toolbar, menu);
-            mActionSelectDone = menu.getItem(0);
+    
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_select_toolbar, menu);
+        mActionSelectDone = menu.getItem(0);
+        if (Constants.isCrop) {
+            mActionSelectDone.setVisible(false);
         }
         return super.onCreateOptionsMenu(menu);
     }
     
     private void toggleSelection(int position) {
-        
-        if (1 == Constants.limit) {
-            mAllImageList.get(position).isSelected = !mAllImageList.get(position).isSelected;
-            if (mAllImageList.get(position).isSelected) {
-                countSelected++;
-            } else {
-                countSelected--;
-            }
+    
+        if (Constants.isCrop) {
+            mSelectedImageList.add(mImageList.get(position));
             sendIntent();
             return;
         }
-        
-        
-        if (!mAllImageList.get(position).isSelected && countSelected >= Constants.limit) {
+    
+        if (!mImageList.get(position).isSelected && mSelectedImageList.size() >= Constants.limit) {
             Toast.makeText(
                     getApplicationContext(),
                     String.format(getString(R.string.limit_exceeded), Constants.limit),
@@ -416,29 +495,48 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
                     .show();
             return;
         }
-        
-        
-        mAllImageList.get(position).isSelected = !mAllImageList.get(position).isSelected;
-        mAllImages.put(mAllImageList.get(position).id, mAllImageList.get(position));
-        if (mAllImageList.get(position).isSelected) {
-            countSelected++;
-            mSelectImages.add(mAllImageList.get(position).id);
+    
+    
+        if (!mImageList.get(position).isSelected) {
+            mSelectedImageList.add(mImageList.get(position));
+            mSelectedIdSet.add(mImageList.get(position).id);
+            mSparseArray.put(mImageList.get(position).id, position);
+            
         } else {
-            mSelectImages.remove(mAllImageList.get(position).id);
-            countSelected--;
+            mSelectedImageList.remove(mImageList.get(position));
+            mSelectedIdSet.remove(mImageList.get(position).id);
+            mSparseArray.remove(mImageList.get(position).id);
         }
+    
+        mImageList.get(position).isSelected = !mImageList.get(position).isSelected;
+
+
+//        mAllImages.put(mAllImageList.get(position).id, mAllImageList.get(position));
+
+//        if (mAllImageList.get(position).isSelected) {
+//            countSelected++;
+//            mSelectImages.add(mAllImageList.get(position).id);
+//        } else {
+//            mSelectImages.remove(mAllImageList.get(position).id);
+//            countSelected--;
+//        }
+        
+        
         adapter.notifyDataSetChanged();
         
         setActionBarText();
         
     }
     
+    /**
+     * 设置工具栏的文字
+     */
     private void setActionBarText() {
-        if (countSelected >= 1) {
+        int selectedSize = mSelectedImageList.size();
+        if (selectedSize > 0) {
             mTvPreview.setTextColor(Color.WHITE);
-            mTvPreview.setText("预览(" + countSelected + ")");
-            mActionSelectDone.setTitle("完成(" + countSelected + "/" + Constants.limit + ")");
-            
+            mTvPreview.setText("预览(" + selectedSize + ")");
+            mActionSelectDone.setTitle("完成(" + selectedSize + "/" + Constants.limit + ")");
         } else {
             mActionSelectDone.setTitle("完成");
             mTvPreview.setTextColor(getResources().getColor(R.color.colorTextGray));
@@ -454,135 +552,33 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
         adapter.notifyDataSetChanged();
     }
     
-    public void setImageSelect(long id, boolean isChecked) {
-        
-        if (isChecked && !mAllImages.get(id).isSelected) {
-            countSelected++;
-            mSelectImages.add(id);
-            mAllImages.get(id).isSelected = true;
-            for (Image image : mAllImageList) {
-                if (image.id == id) {
-                    image.isSelected = true;
-                }
-            }
-            adapter.notifyDataSetChanged();
-            setActionBarText();
-        } else if (!isChecked && mAllImages.get(id).isSelected) {
-            mSelectImages.remove(id);
-            countSelected--;
-            mAllImages.get(id).isSelected = false;
-            
-            for (Image image : mAllImageList) {
-                if (image.id == id) {
-                    image.isSelected = false;
-                }
-            }
-            adapter.notifyDataSetChanged();
-            
-            
-            setActionBarText();
-        }
-        
-        
-    }
-    
-    private ArrayList<Image> getSelected() {
-        ArrayList<Image> selectedImages = new ArrayList<>();
-        
-        for (int i = 0, nsize = mAllImages.size(); i < nsize; i++) {
-            Image obj = mAllImages.valueAt(i);
-            if (obj.isSelected) {
-                selectedImages.add(obj);
-            }
-        }
-        
-        return selectedImages;
-    }
+
     
     private void sendIntent() {
         Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(Constants.INTENT_EXTRA_IMAGES, getSelected());
+        intent.putParcelableArrayListExtra(Constants.INTENT_EXTRA_IMAGES, mSelectedImageList);
         setResult(RESULT_OK, intent);
         finish();
     }
     
-    private void loadImages() {
-        startThread(new ImageLoaderRunnable());
-    }
-    
-    private void startThread(Runnable runnable) {
-        stopThread();
-        thread = new Thread(runnable);
-        thread.start();
-    }
-    
-    private void startThread2(Runnable runnable) {
-        stopThread2();
-        thread2 = new Thread(runnable);
-        thread2.start();
-    }
-    
-    private void loadAlbums() {
-        startThread2(new AlbumLoaderRunnable());
-    }
-    
-    private void stopThread() {
-        if (thread == null || !thread.isAlive()) {
-            return;
-        }
-        
-        thread.interrupt();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void stopThread2() {
-        if (thread2 == null || !thread2.isAlive()) {
-            return;
-        }
-        
-        thread2.interrupt();
-        try {
-            thread2.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void sendMessage(int what) {
-        sendMessage(what, 0);
-    }
-    
-    private void sendMessage(int what, int arg1) {
-        if (handler == null) {
-            return;
-        }
-        
-        Message message = handler.obtainMessage();
-        message.what = what;
-        message.arg1 = arg1;
-        message.sendToTarget();
-    }
     
     @Override
     protected void permissionGranted() {
-        sendMessage(PERMISSION_GRANTED);
+        L.e("permissionGranted ---- ");
+        
     }
     
     @Override
     protected void hideViews() {
         progressBar.setVisibility(View.INVISIBLE);
-        gridView.setVisibility(View.INVISIBLE);
+//        gridView.setVisibility(View.INVISIBLE);
     }
     
     /**
      * 设置Toolbar的 相关api
      */
     private void setToolbar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+    
         setSupportActionBar(mToolbar);
         
         ActionBar actionBar = getSupportActionBar();
@@ -593,8 +589,6 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
         }
         
         mToolbar.setTitle("所有图片");
-        
-        //mToolbar.setNavigationIcon(R.drawable.ic_back);
         
         mToolbar.setContentInsetStartWithNavigation(0);
         
@@ -622,7 +616,36 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
         });
     }
     
-    private static class MyHandler extends Handler {
+    
+    @Override
+    public void onChangeImageStatus(int index) {
+        
+        Image tempImage = mPreviewImages.get(index);
+        
+        Image image = mSelectedImageList.get(index);
+        
+        Integer currentIndex = mSparseArray.get(image.id);
+        
+        if (mSelectedIdSet.contains(image.id)) {
+            mSelectedIdSet.remove(image.id);
+            mImageList.get(currentIndex).isSelected = false;
+            mSelectedImageList.remove(index);
+            
+        } else {
+            mSelectedIdSet.add(image.id);
+            mImageList.get(index).isSelected = true;
+            mSelectedImageList.add(index, tempImage);
+        }
+        
+    }
+    
+    @Override
+    public void onRefreshImageList() {
+        adapter.notifyDataSetChanged();
+        setActionBarText();
+    }
+    
+    /*private static class MyHandler extends Handler {
         
         private WeakReference<ImageSelectActivity2> mActivityWeakReference;
         
@@ -637,179 +660,13 @@ public class ImageSelectActivity2 extends HelperActivity implements LoaderManage
             switch (msg.what) {
                 case PERMISSION_GRANTED: //权限允许
                     activity.loadImages(null);
+                    activity.loadAlbums();
                     break;
             }
         }
         
         
-    }
-    
-    private class ImageLoaderRunnable implements Runnable {
-        @Override
-        public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            /*
-            If the adapter is null, this is first time this activity's view is
-            being shown, hence send FETCH_STARTED message to show progress bar
-            while mAllImageList are loaded from phone
-             */
-            if (adapter == null) {
-                sendMessage(Constants.FETCH_STARTED);
-            }
-            
-            File file;
-            HashSet<Long> selectedImages = new HashSet<>();
-            if (mAllImageList != null) {
-                Image image;
-                for (int i = 0, l = mAllImageList.size(); i < l; i++) {
-                    image = mAllImageList.get(i);
-                    file = new File(image.path);
-                    if (file.exists() && image.isSelected) {
-                        selectedImages.add(image.id);
-                    }
-                }
-            }
-            
-            
-            Cursor cursor;
-            boolean isAllAlbum = TextUtils.isEmpty(mSelectedAlbumName);
-            if (isAllAlbum) {
-                cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                        null, null, MediaStore.Images.Media.DATE_ADDED);
-                
-            } else {
-                cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{mSelectedAlbumName},
-                        MediaStore.Images.Media.DATE_ADDED);
-            }
-            
-            if (cursor == null) {
-                sendMessage(Constants.ERROR);
-                return;
-            }
-
-            /*
-            In case this runnable is executed to onChange calling loadImages,
-            using countSelected variable can result in a race condition. To avoid that,
-            tempCountSelected keeps track of number of selected mAllImageList. On handling
-            FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
-             */
-            int tempCountSelected = 0;
-            ArrayList<Image> temp = new ArrayList<>();
-            if (cursor.moveToLast()) {
-                do {
-                    if (Thread.interrupted()) {
-                        cursor.close();
-                        return;
-                    }
-                    
-                    long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
-                    String name = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    String path = cursor.getString(cursor.getColumnIndex(projection[2]));
-                    boolean isSelected = selectedImages.contains(id);
-                    if (isSelected) {
-                        tempCountSelected++;
-                    }
-                    isSelected = mSelectImages.contains(id);
-                    file = new File(path);
-                    if (file.exists()) {
-                        Image image = new Image(id, name, path, isSelected);
-                        temp.add(image);
-                        mAllImages.put(id, image);
-                        
-                    }
-                    
-                } while (cursor.moveToPrevious());
-            }
-            cursor.close();
-            
-            
-            if (mAllImageList == null) {
-                mAllImageList = new ArrayList<>();
-            }
-            mAllImageList.clear();
-            mAllImageList.addAll(temp);
-            
-            
-            sendMessage(Constants.FETCH_COMPLETED, tempCountSelected);
-        }
-    }
-    
-    
-    //-------------------------- 修改--------------------------
-    
-    private class AlbumLoaderRunnable implements Runnable {
-        @Override
-        public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            
-            if (mAlbumSelectAdapter == null) {
-                sendMessage(Constants.ALBUM_FETCH_STARTED);
-            }
-            
-            Cursor cursor = getContentResolver()
-                    .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection2,
-                            null, null, MediaStore.Images.Media.DATE_ADDED);
-            if (cursor == null) {
-                sendMessage(Constants.ERROR);
-                return;
-            }
-            
-            
-            ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
-            
-            
-            HashMap<Long, Integer> albumMap = new HashMap<>();
-            
-            File file;
-            int i = 0;
-            if (cursor.moveToLast()) {
-                do {
-                    if (Thread.interrupted()) {
-                        cursor.close();
-                        return;
-                    }
-                    
-                    long albumId = cursor.getLong(cursor.getColumnIndex(projection2[0]));
-                    String album = cursor.getString(cursor.getColumnIndex(projection2[1]));
-                    String image = cursor.getString(cursor.getColumnIndex(projection2[2]));
-                    
-                    
-                    if (!albumMap.containsKey(albumId)) {
-                        file = new File(image);
-                        if (file.exists()) {
-                            temp.add(new Album(album, image, 1));
-                            albumMap.put(albumId, i++);
-                        }
-                    } else {
-                        Album album1 = temp.get(albumMap.get(albumId));
-                        album1.setCount(album1.getCount() + 1);
-                    }
-                    
-                    
-                } while (cursor.moveToPrevious());
-            }
-            if (temp.size() == 0) {
-                sendMessage(Constants.EMPTY);
-                cursor.close();
-                return;
-            }
-            Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
-            
-            cursor.close();
-            
-            if (mAllAlbumList == null) {
-                mAllAlbumList = new ArrayList<>();
-            }
-            mAllAlbumList.clear();
-//            mAllAlbumList.add(all);
-            mAllAlbumList.add(allalbum);
-            
-            mAllAlbumList.addAll(temp);
-            
-            sendMessage(Constants.ALBUM_FETCH_COMPLETED);
-        }
-    }
+    }*/
     
     
 }

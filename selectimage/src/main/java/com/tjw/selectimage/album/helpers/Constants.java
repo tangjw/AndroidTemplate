@@ -30,4 +30,5 @@ public class Constants {
     
     //Maximum number of images that can be selected at a time
     public static int limit = 0;
+    public static boolean isCrop = false;
 }

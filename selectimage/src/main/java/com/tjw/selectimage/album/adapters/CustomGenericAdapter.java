@@ -22,6 +22,11 @@ public abstract class CustomGenericAdapter<T> extends BaseAdapter {
         this.layoutInflater = LayoutInflater.from(this.context);
     }
     
+    public void setArrayList(ArrayList<T> arrayList) {
+        this.arrayList = arrayList;
+        notifyDataSetChanged();
+    }
+    
     @Override
     public int getCount() {
         return arrayList.size();

@@ -118,4 +118,6 @@ public class HelperActivity extends AppCompatActivity {
     protected void setView(View view) {
         this.view = view;
     }
+    
+    
 }

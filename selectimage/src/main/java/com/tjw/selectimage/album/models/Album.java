@@ -41,9 +41,10 @@ public class Album {
         this.name = name;
     }
     
-    public Album(String name, String cover, int count) {
+    public Album(String name, String cover, int count, boolean isSelected) {
         this.name = name;
         this.cover = cover;
         this.count = count;
+        this.selected = isSelected;
     }
 }

@@ -28,9 +28,14 @@ public class AlbumSelectAdapter extends BaseAdapter {
         this.albums = albums;
     }
     
+    
+    public void setAlbums(ArrayList<Album> albums) {
+        this.albums = albums;
+        notifyDataSetChanged();
+    }
+    
     @Override
     public int getCount() {
-        
         return albums.size();
     }
     

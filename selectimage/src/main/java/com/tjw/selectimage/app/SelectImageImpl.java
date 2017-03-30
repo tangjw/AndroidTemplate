@@ -92,6 +92,7 @@ public class SelectImageImpl implements SelectImage {
     @Override
     public void fromCamera() {
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) return;
+        Constants.isCrop = false;
         this.fromType = TImage.FromType.CAMERA;
         
         this.rawImageUri = file2uri(createOutFile());
@@ -109,6 +110,7 @@ public class SelectImageImpl implements SelectImage {
     @Override
     public void fromCamera(@Nullable CropOptions options) {
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) return;
+        Constants.isCrop = true;
         this.fromType = TImage.FromType.CAMERA;
         this.cropOptions = options;
         
@@ -129,6 +131,7 @@ public class SelectImageImpl implements SelectImage {
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) {
             return;
         }
+        Constants.isCrop = false;
         
         this.fromType = TImage.FromType.OTHER;
         
@@ -140,7 +143,7 @@ public class SelectImageImpl implements SelectImage {
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) {
             return;
         }
-        
+        Constants.isCrop = true;
         this.fromType = TImage.FromType.OTHER;
         this.cropOptions = options;
         this.cropImageUri = Uri.fromFile(createCropFile());

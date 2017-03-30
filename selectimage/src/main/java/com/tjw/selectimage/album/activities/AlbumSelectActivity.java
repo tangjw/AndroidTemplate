@@ -274,7 +274,7 @@ public class AlbumSelectActivity extends HelperActivity {
                          */
                         file = new File(image);
                         if (file.exists()) {
-                            temp.add(new Album(album, image, 10));
+                            temp.add(new Album(album, image, 10, false));
                             albumSet.add(albumId);
                         }
                     }

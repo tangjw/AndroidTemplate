@@ -277,8 +277,8 @@ public class ImageSelectActivity extends HelperActivity {
                 null,
                 null,
                 MediaStore.Images.Media.DATE_ADDED);
-        
-        imageLoader.loadInBackground();
+
+//        imageLoader.loadInBackground();
         
     }
     
@@ -721,7 +721,7 @@ public class ImageSelectActivity extends HelperActivity {
                     if (!albumMap.containsKey(albumId)) {
                         file = new File(image);
                         if (file.exists()) {
-                            temp.add(new Album(album, image, 1));
+                            temp.add(new Album(album, image, 1, false));
                             albumMap.put(albumId, i++);
                         }
                     } else {
@@ -737,7 +737,7 @@ public class ImageSelectActivity extends HelperActivity {
                 cursor.close();
                 return;
             }
-            Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount());
+            Album allalbum = new Album("所有图片", temp.get(0).getCover(), cursor.getCount(), false);
             
             cursor.close();
     
