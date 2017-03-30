@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -16,31 +15,26 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.tjw.selectimage.R;
+import com.tjw.selectimage.album.adapters.ImagePreviewAdapter;
 import com.tjw.selectimage.album.models.Image;
 import com.tjw.selectimage.album.widget.ZoomOutPageTransformer;
-import com.tjw.selectimage.photoview.OnPhotoTapListener;
-import com.tjw.selectimage.photoview.PhotoView;
 import com.tjw.selectimage.uitl.L;
 
 import java.util.ArrayList;
 
 public class ImagePreviewFragment extends DialogFragment implements ViewPager.OnPageChangeListener {
     
+    public ArrayList<Image> mImageArrayList;
     private ViewPager mViewPager;
-    private ArrayList<Image> mImageArrayList;
     private Toolbar mToolbar;
     private CheckBox mCbSelect;
     private View mPaddingLayout;
     private Window mDialogWindow;
     
     private int currentPosition;
+    private OnFragmentInteractionListener mListener;
     
     public static ImagePreviewFragment newInstance(@NonNull ArrayList<Image> images) {
         
@@ -51,19 +45,16 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
         return fragment;
     }
     
-    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.MultiImageSelectTheme);
         if (getArguments() != null) {
-            L.e("onCreate ----------");
             mImageArrayList = getArguments().getParcelableArrayList("images");
         }
         
         
     }
-    
     
     @Override
     public void onAttach(Context context) {
@@ -86,31 +77,24 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
         mCbSelect = (CheckBox) view.findViewById(R.id.cb_select);
         mPaddingLayout = view.findViewById(R.id.paddinglayout);
         setToolbar();
-        return view;
-    }
-    
-    @Override
-    public void onViewCreated(final View view, Bundle savedInstanceState) {
     
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
     
         mViewPager.addOnPageChangeListener(this);
     
-        final BrowseAdapter adapter = new BrowseAdapter();
-        mViewPager.setAdapter(adapter);
-        
-        mCbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mViewPager.setAdapter(new ImagePreviewAdapter(mImageArrayList));
+    
+    
+        mCbSelect.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-    
+            public void onClick(View v) {
                 unselectImage(currentPosition);
-    
-                L.e("mImageArrayList.size " + mImageArrayList.size());
-    
-                mImageArrayList.get(mViewPager.getCurrentItem()).isSelected = isChecked;
-                adapter.notifyDataSetChanged();
+                mImageArrayList.get(mViewPager.getCurrentItem()).isSelected = !mImageArrayList.get(mViewPager.getCurrentItem()).isSelected;
+                mCbSelect.setChecked(mImageArrayList.get(mViewPager.getCurrentItem()).isSelected);
             }
         });
+    
+        return view;
     }
     
     @Override
@@ -129,61 +113,11 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
         mToolbar.setTitle(position + 1 + "/" + mImageArrayList.size());
         mCbSelect.setChecked(mImageArrayList.get(position).isSelected);
         currentPosition = position;
-        L.i("currentPosition => " + position);
     }
     
     @Override
     public void onPageScrollStateChanged(int state) {
         
-    }
-    
-    /**
-     * 图片适配器
-     */
-    private class BrowseAdapter extends PagerAdapter {
-        
-        @Override
-        public int getCount() {
-            return mImageArrayList.size();
-        }
-        
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }
-        
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Context context = container.getContext();
-            PhotoView image = new PhotoView(context);
-            image.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, -2));
-    
-            if (mImageArrayList.get(position).path.endsWith(".gif") || mImageArrayList.get(position).path.contains(".gif")) {
-                
-                Glide.with(context)
-                        .load(mImageArrayList.get(position).path)
-                        .into(new GlideDrawableImageViewTarget(image, 0));
-            } else {
-                Glide.with(context)
-                        .load(mImageArrayList.get(position).path)
-                        .into(image);
-            }
-            
-            image.setOnPhotoTapListener(new OnPhotoTapListener() {
-                @Override
-                public void onPhotoTap(ImageView view, float x, float y) {
-                    tabFullscreen();
-                }
-            });
-            
-            container.addView(image);
-            return image;
-        }
-        
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView((View) object);
-        }
     }
     
     @SuppressLint("PrivateResource")
@@ -252,12 +186,11 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
         }
     }
     
-    
-    private OnFragmentInteractionListener mListener;
-    
     private void unselectImage(int index) {
         if (mListener != null) {
+            L.e("mImageArrayList size1 " + mImageArrayList.size());
             mListener.onChangeImageStatus(index);
+            L.e("mImageArrayList size11 " + mImageArrayList.size());
         }
     }
     
@@ -267,16 +200,16 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
         }
     }
     
-    public interface OnFragmentInteractionListener {
-        void onChangeImageStatus(int index);
-        
-        void onRefreshImageList();
-    }
-    
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+    
+    public interface OnFragmentInteractionListener {
+        void onChangeImageStatus(int index);
+        
+        void onRefreshImageList();
     }
     
 }

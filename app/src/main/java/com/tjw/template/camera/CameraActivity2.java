@@ -183,6 +183,9 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
                 });
     }
     
+    private void pickImage() {
+        mSelectImage.fromAlbum(9 - mSelectedImage2s.size());
+    }
     
     private class MyAdapter2 extends BaseAdapter {
         
@@ -191,14 +194,14 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
         public MyAdapter2() {
             mSelectedImgList = new ArrayList<>();
         }
+    
+        public ArrayList<TImage> getSelectedImgList() {
+            return mSelectedImgList;
+        }
         
         public void setSelectedImgList(ArrayList<TImage> selectedImgList) {
             mSelectedImgList = selectedImgList;
             notifyDataSetChanged();
-        }
-        
-        public ArrayList<TImage> getSelectedImgList() {
-            return mSelectedImgList;
         }
         
         @Override
@@ -234,7 +237,7 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
             
             if (mSelectedImgList.size() > 0 && position < mSelectedImgList.size()) {
                 Glide.with(CameraActivity2.this)
-                        .load(mSelectedImgList.get(mSelectedImgList.size() - 1 - position).getOriginalPath())
+                        .load(mSelectedImgList.get(position).getOriginalPath())
                         .into(img);
                 del.setVisibility(View.VISIBLE);
                 img.setOnClickListener(new View.OnClickListener() {
@@ -257,10 +260,6 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
             }
             return convertView;
         }
-    }
-    
-    private void pickImage() {
-        mSelectImage.fromAlbum(9 - mSelectedImage2s.size());
     }
     
     
