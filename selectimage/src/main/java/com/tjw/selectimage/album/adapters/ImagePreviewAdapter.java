@@ -12,6 +12,7 @@ import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.tjw.selectimage.album.models.Image;
 import com.tjw.selectimage.photoview.OnPhotoTapListener;
 import com.tjw.selectimage.photoview.PhotoView;
+import com.tjw.selectimage.uitl.L;
 
 import java.util.ArrayList;
 
@@ -24,8 +25,19 @@ public class ImagePreviewAdapter extends PagerAdapter {
     
     private ArrayList<Image> mDataList;
     
+    private OnItemPhotoTapListener mTapListener;
+    
     public ImagePreviewAdapter(ArrayList<Image> dataList) {
         mDataList = dataList;
+    }
+    
+    public void setDataList(ArrayList<Image> dataList) {
+        mDataList = dataList;
+        notifyDataSetChanged();
+    }
+    
+    public void setTapListener(OnItemPhotoTapListener tapListener) {
+        mTapListener = tapListener;
     }
     
     @Override
@@ -40,19 +52,25 @@ public class ImagePreviewAdapter extends PagerAdapter {
     
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+    
         Context context = container.getContext();
+    
         PhotoView image = new PhotoView(context);
-        image.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        
-        if (mDataList.get(position).path.endsWith(".gif") || mDataList.get(position).path.contains(".gif")) {
-            
+    
+        image.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+    
+        String imgPath = mDataList.get(position).path;
+    
+        if (imgPath.endsWith(".gif") || imgPath.contains(".gif")) {
+            L.w("load gif => " + imgPath);
             Glide.with(context)
-                    .load(mDataList.get(position).path)
-                    .fitCenter()
+                    .load(imgPath)
                     .into(new GlideDrawableImageViewTarget(image, 0));
         } else {
             Glide.with(context)
-                    .load(mDataList.get(position).path)
+                    .load(imgPath)
                     .fitCenter()
                     .into(image);
         }
@@ -60,7 +78,7 @@ public class ImagePreviewAdapter extends PagerAdapter {
         image.setOnPhotoTapListener(new OnPhotoTapListener() {
             @Override
             public void onPhotoTap(ImageView view, float x, float y) {
-//                tabFullscreen();
+                mTapListener.onPhotoTap(view, x, y);
             }
         });
         
@@ -71,6 +89,10 @@ public class ImagePreviewAdapter extends PagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((View) object);
+    }
+    
+    public interface OnItemPhotoTapListener {
+        void onPhotoTap(ImageView view, float x, float y);
     }
     
 }

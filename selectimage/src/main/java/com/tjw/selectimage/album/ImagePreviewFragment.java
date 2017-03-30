@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.adapters.ImagePreviewAdapter;
@@ -82,8 +83,14 @@ public class ImagePreviewFragment extends DialogFragment implements ViewPager.On
     
         mViewPager.addOnPageChangeListener(this);
     
-        mViewPager.setAdapter(new ImagePreviewAdapter(mImageArrayList));
-    
+        ImagePreviewAdapter adapter = new ImagePreviewAdapter(mImageArrayList);
+        mViewPager.setAdapter(adapter);
+        adapter.setTapListener(new ImagePreviewAdapter.OnItemPhotoTapListener() {
+            @Override
+            public void onPhotoTap(ImageView view, float x, float y) {
+                tabFullscreen();
+            }
+        });
     
         mCbSelect.setOnClickListener(new View.OnClickListener() {
             @Override

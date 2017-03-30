@@ -3,7 +3,6 @@ package com.tjw.selectimage.album.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -26,14 +25,13 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.ImagePreviewFragment;
 import com.tjw.selectimage.album.adapters.AlbumSelectAdapter;
-import com.tjw.selectimage.album.adapters.CustomImageSelectAdapter;
+import com.tjw.selectimage.album.adapters.ImageSelectAdapter;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.album.models.Album;
 import com.tjw.selectimage.album.models.Image;
@@ -59,9 +57,7 @@ public class ImageSelectActivity2 extends HelperActivity
             MediaStore.Images.Media.BUCKET_ID,
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.DATA};
-    /**
-     * 所有的图片 SparseArray id为key
-     */
+    
     /**
      * 当前选中的相册名,默认为 null
      */
@@ -70,14 +66,15 @@ public class ImageSelectActivity2 extends HelperActivity
     private TextView errorDisplay;
     private ProgressBar progressBar;
     private GridView gridView;
-    private CustomImageSelectAdapter adapter;
+    private ImageSelectAdapter adapter;
     private AlbumSelectAdapter mAlbumSelectAdapter;
-    private ContentObserver observer;
+    
+    //private ContentObserver observer;
+    
     private Toolbar mToolbar;
     private MenuItem mActionSelectDone;
     private TextView mTvPreview;
     private TextView mTvAlbum;
-    private RelativeLayout mBottomToolBar;
     private ListPopupWindow mListPopupWindow;
     private int mCurrentSelectedAlbum;
     private ArrayList<Image> mImageList;
@@ -109,6 +106,41 @@ public class ImageSelectActivity2 extends HelperActivity
         setViewActionListener();
     }
     
+    @Override
+    protected void onStart() {
+        super.onStart();
+    
+        /*observer = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                loadAlbums();
+                L.i("mSelectedAlbumName => "+mSelectedAlbumName);
+                loadImages(mSelectedAlbumName);
+            }
+        };
+        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);*/
+        
+    }
+    
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+//        getContentResolver().unregisterContentObserver(observer);
+//        observer = null;
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        mImageList = null;
+        if (adapter != null) {
+            adapter.releaseResources();
+        }
+        gridView.setOnItemClickListener(null);
+    }
+    
     /**
      * 初始化数据, 查询图片相册
      */
@@ -127,8 +159,6 @@ public class ImageSelectActivity2 extends HelperActivity
         
         mTvAlbum = (TextView) findViewById(R.id.tv_select_album);
         
-        mBottomToolBar = (RelativeLayout) findViewById(R.id.rl_select_album);
-        
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         
         setToolbar();
@@ -141,12 +171,15 @@ public class ImageSelectActivity2 extends HelperActivity
         
         
         mListPopupWindow = new ListPopupWindow(ImageSelectActivity2.this);
-        mListPopupWindow.setAnchorView(mBottomToolBar);
+        mListPopupWindow.setAnchorView(findViewById(R.id.rl_select_album));
         mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
-        mListPopupWindow.setHeight(1000);
+        mListPopupWindow.setHeight(ListPopupWindow.WRAP_CONTENT);
         mListPopupWindow.setModal(true);
     }
     
+    /**
+     * 设置控件的监听
+     */
     private void setViewActionListener() {
         
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -200,7 +233,7 @@ public class ImageSelectActivity2 extends HelperActivity
                     } else {
                         mPreviewImages.clear();
                     }
-        
+    
                     mPreviewImages.addAll(mSelectedImageList);
     
                     mImagePreviewFragment = ImagePreviewFragment.newInstance(mPreviewImages);
@@ -209,22 +242,6 @@ public class ImageSelectActivity2 extends HelperActivity
                 
             }
         });
-    }
-    
-    @Override
-    protected void onStart() {
-        super.onStart();
-    
-        /*observer = new ContentObserver(handler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                loadAlbums();
-                loadImages(mSelectedAlbumName);
-            }
-        };
-        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);*/
-
-//        checkPermission();
     }
     
     @Override
@@ -312,7 +329,7 @@ public class ImageSelectActivity2 extends HelperActivity
         }*/
     
         if (adapter == null) {
-            adapter = new CustomImageSelectAdapter(getApplicationContext(), mImageList);
+            adapter = new ImageSelectAdapter(getApplicationContext(), mImageList);
             gridView.setAdapter(adapter);
         } else {
             L.d("adapter.setArrayList(mImageList);");
@@ -348,12 +365,11 @@ public class ImageSelectActivity2 extends HelperActivity
             loaderManager.initLoader(IMAGE_ALL, args, this);
         } else {
             loaderManager.restartLoader(IMAGE_ALBUM, args, this);
-        
+    
         }
         
         
     }
-    
     
     private void loadAlbums() {
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -416,6 +432,9 @@ public class ImageSelectActivity2 extends HelperActivity
                 mAllAlbumLists.get(mCurrentSelectedAlbum).setSelected(true);
                 if (mAlbumSelectAdapter == null) {
                     mAlbumSelectAdapter = new AlbumSelectAdapter(mAllAlbumLists);
+                    if (mAllAlbumLists.size() * dip2px(110) > getScreenHeight()) {
+                        mListPopupWindow.setHeight((int) (getScreenHeight() * 0.76));
+                    }
                     mListPopupWindow.setAdapter(mAlbumSelectAdapter);
                 } else {
                     mAlbumSelectAdapter.setAlbums(mAllAlbumLists);
@@ -428,30 +447,6 @@ public class ImageSelectActivity2 extends HelperActivity
                 
             }
         });
-    }
-    
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-//        getContentResolver().unregisterContentObserver(observer);
-//        observer = null;
-
-//        if (handler != null) {
-//            handler.removeCallbacksAndMessages(null);
-//            handler = null;
-//        }
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-//        mAllImageList = null;
-        if (adapter != null) {
-            adapter.releaseResources();
-        }
-        gridView.setOnItemClickListener(null);
     }
     
     @Override
@@ -553,7 +548,7 @@ public class ImageSelectActivity2 extends HelperActivity
     
     @Override
     protected void hideViews() {
-        progressBar.setVisibility(View.INVISIBLE);
+//        progressBar.setVisibility(View.INVISIBLE);
 //        gridView.setVisibility(View.INVISIBLE);
     }
     
@@ -634,4 +629,39 @@ public class ImageSelectActivity2 extends HelperActivity
         setActionBarText();
     }
     
+    
+     /*private static class MyHandler extends Handler {
+        
+        private WeakReference<ImageSelectActivity2> mActivityWeakReference;
+        
+        MyHandler(ImageSelectActivity2 activity) {
+            mActivityWeakReference = new WeakReference<>(activity);
+        }
+        
+        @Override
+        public void handleMessage(Message msg) {
+            ImageSelectActivity2 activity = mActivityWeakReference.get();
+            if (activity == null) return;
+            switch (msg.what) {
+                case PERMISSION_GRANTED: //权限允许
+                    activity.loadImages(null);
+                    activity.loadAlbums();
+                    break;
+            }
+        }
+        
+        
+    }*/
+    
+    public int dip2px(float dp) {
+        final float density = getResources().getDisplayMetrics().density;
+        return (int) (dp * density + 0.5f);
+    }
+    
+    private int getScreenHeight() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        
+        return dm.heightPixels;
+    }
 }

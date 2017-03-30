@@ -23,25 +23,6 @@
         </provider>
 
         <activity
-            android:name=".album.activities.AlbumSelectActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/MultipleImageSelectTheme">
-            <!--<intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>-->
-        </activity>
-        <activity
-            android:name=".album.activities.ImageSelectActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/MultiImageSelectTheme">
-            <!--<intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>-->
-        </activity>
-
-        <activity
             android:name=".album.activities.ImageSelectActivity2"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
