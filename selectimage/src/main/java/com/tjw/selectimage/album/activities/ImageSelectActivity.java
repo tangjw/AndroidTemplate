@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class ImageSelectActivity2 extends HelperActivity
+public class ImageSelectActivity extends HelperActivity
         implements LoaderManager.LoaderCallbacks<Cursor>,
         ImagePreviewFragment.OnFragmentInteractionListener {
     
@@ -168,9 +168,9 @@ public class ImageSelectActivity2 extends HelperActivity
         
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_image_select);
         gridView = (GridView) findViewById(R.id.grid_view_image_select);
-        
-        
-        mListPopupWindow = new ListPopupWindow(ImageSelectActivity2.this);
+    
+    
+        mListPopupWindow = new ListPopupWindow(ImageSelectActivity.this);
         mListPopupWindow.setAnchorView(findViewById(R.id.rl_select_album));
         mListPopupWindow.setWidth(ListPopupWindow.MATCH_PARENT);
         mListPopupWindow.setHeight(ListPopupWindow.WRAP_CONTENT);
@@ -632,15 +632,15 @@ public class ImageSelectActivity2 extends HelperActivity
     
      /*private static class MyHandler extends Handler {
         
-        private WeakReference<ImageSelectActivity2> mActivityWeakReference;
+        private WeakReference<ImageSelectActivity> mActivityWeakReference;
         
-        MyHandler(ImageSelectActivity2 activity) {
+        MyHandler(ImageSelectActivity activity) {
             mActivityWeakReference = new WeakReference<>(activity);
         }
         
         @Override
         public void handleMessage(Message msg) {
-            ImageSelectActivity2 activity = mActivityWeakReference.get();
+            ImageSelectActivity activity = mActivityWeakReference.get();
             if (activity == null) return;
             switch (msg.what) {
                 case PERMISSION_GRANTED: //权限允许

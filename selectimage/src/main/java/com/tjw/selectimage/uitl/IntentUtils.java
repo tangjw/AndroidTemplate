@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.tjw.selectimage.album.activities.ImageSelectActivity2;
+import com.tjw.selectimage.album.activities.ImageSelectActivity;
 import com.tjw.selectimage.album.helpers.Constants;
 import com.tjw.selectimage.model.CropOptions;
 import com.tjw.selectimage.model.TContextWrap;
@@ -27,7 +27,7 @@ public class IntentUtils {
      */
     public static Intent getPickMultipleIntent(TContextWrap contextWrap, int limit) {
         Constants.limit = limit;
-        return new Intent(contextWrap.getActivity(), ImageSelectActivity2.class);
+        return new Intent(contextWrap.getActivity(), ImageSelectActivity.class);
     }
     
     /**

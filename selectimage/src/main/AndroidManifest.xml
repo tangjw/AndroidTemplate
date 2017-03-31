@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
         <activity
-            android:name="com.soundcloud.android.crop.CropImageActivity"
+            android:name=".dragphoto.DragPhotoActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"/>
         <provider
@@ -23,7 +23,7 @@
         </provider>
 
         <activity
-            android:name=".album.activities.ImageSelectActivity2"
+            android:name=".album.activities.ImageSelectActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/MultiImageSelectTheme">
