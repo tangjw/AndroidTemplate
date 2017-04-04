@@ -123,4 +123,11 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onDestroy();
         ActivityStackUtils.getInstance().finishActivity();
     }
+    
+    @Override
+    public void onBackPressed() {
+        if (!mSwipeBackHelper.isSliding()) {
+            super.onBackPressed();
+        }
+    }
 }

@@ -49,6 +49,7 @@ class UIUtil {
         if (resourceId > 0 && checkDeviceHasNavigationBar(activity)) {
             navigationBarHeight = resources.getDimensionPixelSize(resourceId);
         }
+        System.out.println("navigationBarHeight ==> " + navigationBarHeight);
         return navigationBarHeight;
     }
 
@@ -71,7 +72,8 @@ class UIUtil {
         }
         return hasNavigationBar;
     }
-
+    
+    
     private static boolean oldCheckDeviceHasNavigationBar(Activity activity) {
         boolean hasNavigationBar = false;
         Resources resources = activity.getResources();

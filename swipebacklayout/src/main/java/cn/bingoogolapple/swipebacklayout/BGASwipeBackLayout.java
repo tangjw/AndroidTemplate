@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.FloatRange;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.os.ParcelableCompat;
 import android.support.v4.os.ParcelableCompatCreatorCallbacks;
@@ -63,7 +64,7 @@ import java.util.ArrayList;
  */
 public class BGASwipeBackLayout extends ViewGroup {
     private static final String TAG = "SlidingPaneLayout";
-
+    
     /**
      * Default size of the overhang for a pane in the open state.
      * At least this much of a sliding pane will remain visible.
@@ -71,89 +72,89 @@ public class BGASwipeBackLayout extends ViewGroup {
      * a "physical" edge to grab to pull it closed.
      */
     private static final int DEFAULT_OVERHANG_SIZE = 32; // dp;
-
+    
     /**
      * If no fade color is given by default it will fade to 80% gray.
      */
     private static final int DEFAULT_FADE_COLOR = 0xcccccccc;
-
+    
     /**
      * The fade color used for the sliding panel. 0 = no fading.
      */
     private int mSliderFadeColor = DEFAULT_FADE_COLOR;
-
+    
     /**
      * Minimum velocity that will be detected as a fling
      */
     private static final int MIN_FLING_VELOCITY = 400; // dips per second
-
+    
     /**
      * The fade color used for the panel covered by the slider. 0 = no fading.
      */
     private int mCoveredFadeColor;
-
+    
     /**
      * Drawable used to draw the shadow between panes by default.
      */
     private Drawable mShadowDrawableLeft;
-
+    
     /**
      * Drawable used to draw the shadow between panes to support RTL (right to left language).
      */
     private Drawable mShadowDrawableRight;
-
+    
     /**
      * The size of the overhang in pixels.
      * This is the minimum section of the sliding panel that will
      * be visible in the open state to allow for a closing drag.
      */
     private final int mOverhangSize;
-
+    
     /**
      * True if a panel can slide with the current measurements
      */
     private boolean mCanSlide;
-
+    
     /**
      * The child view that can slide, if any.
      */
     View mSlideableView;
-
+    
     /**
      * How far the panel is offset from its closed position.
      * range [0, 1] where 0 = closed, 1 = open.
      */
     float mSlideOffset;
-
+    
     /**
      * How far the non-sliding panel is parallaxed from its usual position when open.
      * range [0, 1]
      */
     private float mParallaxOffset;
-
+    
     /**
      * How far in pixels the slideable panel may move.
      */
     int mSlideRange;
-
+    
     /**
      * A panel view is locked into internal scrolling or another condition that
      * is preventing a drag.
      */
     boolean mIsUnableToDrag;
-
+    
     /**
      * Distance in pixels to parallax the fixed pane by when fully closed
      */
     private int mParallaxBy;
-
+    
     private float mInitialMotionX;
     private float mInitialMotionY;
-
+    
     private PanelSlideListener mPanelSlideListener;
-
+    
     final ViewDragHelper mDragHelper;
-
+    
     /**
      * Stores whether or not the pane was open the last time it was slideable.
      * If open/close operations are invoked this state is modified. Used by
@@ -161,14 +162,14 @@ public class BGASwipeBackLayout extends ViewGroup {
      */
     boolean mPreservedOpenState;
     private boolean mFirstLayout = true;
-
+    
     private final Rect mTmpRect = new Rect();
-
+    
     final ArrayList<DisableLayerRunnable> mPostedRunnables =
             new ArrayList<DisableLayerRunnable>();
-
+    
     static final SlidingPanelLayoutImpl IMPL;
-
+    
     static {
         final int deviceVersion = Build.VERSION.SDK_INT;
         if (deviceVersion >= 17) {
@@ -179,7 +180,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             IMPL = new SlidingPanelLayoutImplBase();
         }
     }
-
+    
     // ======================== 新加的 START ========================
     /**
      * 滑动返回是否可用
@@ -213,9 +214,31 @@ public class BGASwipeBackLayout extends ViewGroup {
      * 内容视图
      */
     private View mContentView;
-
+    
     private Activity mActivity;
-
+    
+    /**
+     * 触发滑动返回的滑动范围
+     */
+    private float mSwipeBackThreshold = 0.3f;
+    /**
+     * 释放后的自动滑动状态
+     * 无状态,
+     * 向左滑动,
+     * 向右滑动
+     */
+    private final static byte MOVE_STATE_NONE = -1;
+    private final static byte MOVE_STATE_LEFT = MOVE_STATE_NONE + 1;
+    private final static byte MOVE_STATE_RIGHT = MOVE_STATE_LEFT + 1;
+    private byte mMoveState = MOVE_STATE_NONE;
+    /**
+     * 记录上一次offset的变化值
+     */
+    private float mLastOffsetDelta;
+    
+    private boolean mIsSliding;
+    //===========================新增END=======================
+    
     /**
      * 将该滑动返回控件添加到 Activity 上
      *
@@ -223,20 +246,20 @@ public class BGASwipeBackLayout extends ViewGroup {
      */
     public void attachToActivity(Activity activity) {
         mActivity = activity;
-
+    
         setSliderFadeColor(Color.TRANSPARENT);
-
+    
         mShadowView = new View(activity);
         setIsNeedShowShadow(mIsNeedShowShadow);
         addView(mShadowView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
+    
         ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
         mContentView = decorView.getChildAt(0);
         decorView.removeView(mContentView);
         decorView.addView(this);
         addView(mContentView, 1, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
-
+    
     /**
      * 设置滑动返回是否可用。默认值为 true
      *
@@ -245,7 +268,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setSwipeBackEnable(boolean swipeBackEnable) {
         mSwipeBackEnable = swipeBackEnable;
     }
-
+    
     /**
      * 设置是否仅仅跟踪左侧边缘的滑动返回。默认值为 true
      *
@@ -254,14 +277,14 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setIsOnlyTrackingLeftEdge(boolean isOnlyTrackingLeftEdge) {
         mIsOnlyTrackingLeftEdge = isOnlyTrackingLeftEdge;
     }
-
+    
     /**
      * 设置是否是微信滑动返回样式。默认值为 true
      */
     public void setIsWeChatStyle(boolean isWeChatStyle) {
         mIsWeChatStyle = isWeChatStyle;
     }
-
+    
     /**
      * 设置阴影资源 id。默认值为 R.drawable.bga_sbl_shadow
      *
@@ -271,7 +294,7 @@ public class BGASwipeBackLayout extends ViewGroup {
         mShadowResId = shadowResId;
         setIsNeedShowShadow(mIsNeedShowShadow);
     }
-
+    
     /**
      * 设置是否显示滑动返回的阴影效果。默认值为 true
      *
@@ -287,7 +310,25 @@ public class BGASwipeBackLayout extends ViewGroup {
             }
         }
     }
-
+    
+    /**
+     * 设置触发释放后自动滑动返回的阈值
+     *
+     * @param threshold 触发释放后自动滑动返回的阈值
+     */
+    public void setSwipeBackThreshold(@FloatRange(from = 0.0f, to = 1.0f) float threshold) {
+        mSwipeBackThreshold = threshold;
+    }
+    
+    /**
+     * 是否正在滑动
+     *
+     * @return
+     */
+    public boolean isSliding() {
+        return this.mIsSliding;
+    }
+    
     /**
      * 设置阴影区域的透明度是否根据滑动的距离渐变。默认值为 true
      *
@@ -296,7 +337,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setIsShadowAlphaGradient(boolean isShadowAlphaGradient) {
         mIsShadowAlphaGradient = isShadowAlphaGradient;
     }
-
+    
     /**
      * 滑动返回是否可用
      *
@@ -306,83 +347,37 @@ public class BGASwipeBackLayout extends ViewGroup {
         return mSwipeBackEnable && BGASwipeBackManager.getInstance().getPenultimateActivity() != null;
     }
     // ======================== 新加的 END ========================
-
-    /**
-     * Listener for monitoring events about sliding panes.
-     */
-    public interface PanelSlideListener {
-        /**
-         * Called when a sliding pane's position changes.
-         *
-         * @param panel       The child view that was moved
-         * @param slideOffset The new offset of this sliding pane within its range, from 0-1
-         */
-        void onPanelSlide(View panel, float slideOffset);
-
-        /**
-         * Called when a sliding pane becomes slid completely open. The pane may or may not
-         * be interactive at this point depending on how much of the pane is visible.
-         *
-         * @param panel The child view that was slid to an open position, revealing other panes
-         */
-        void onPanelOpened(View panel);
-
-        /**
-         * Called when a sliding pane becomes slid completely closed. The pane is now guaranteed
-         * to be interactive. It may now obscure other views in the layout.
-         *
-         * @param panel The child view that was slid to a closed position
-         */
-        void onPanelClosed(View panel);
-    }
-
-    /**
-     * No-op stubs for {@link PanelSlideListener}. If you only want to implement a subset
-     * of the listener methods you can extend this instead of implement the full interface.
-     */
-    public static class SimplePanelSlideListener implements PanelSlideListener {
-        @Override
-        public void onPanelSlide(View panel, float slideOffset) {
-        }
-
-        @Override
-        public void onPanelOpened(View panel) {
-        }
-
-        @Override
-        public void onPanelClosed(View panel) {
-        }
-    }
-
+    
+    
     public BGASwipeBackLayout(Context context) {
         this(context, null);
     }
-
+    
     public BGASwipeBackLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
+    
     public BGASwipeBackLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
+        
         final float density = context.getResources().getDisplayMetrics().density;
-
+        
         // ======================== 新加的 START ========================
 //        mOverhangSize = (int) (DEFAULT_OVERHANG_SIZE * density + 0.5f);
         mOverhangSize = 0;
         // ======================== 新加的 END ========================
-
+        
         final ViewConfiguration viewConfig = ViewConfiguration.get(context);
-
+        
         setWillNotDraw(false);
-
+        
         ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegate());
         ViewCompat.setImportantForAccessibility(this, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
-
+        
         mDragHelper = ViewDragHelper.create(this, 0.5f, new DragHelperCallback());
         mDragHelper.setMinVelocity(MIN_FLING_VELOCITY * density);
     }
-
+    
     /**
      * Set a distance to parallax the lower pane by when the upper pane is in its
      * fully closed state. The lower pane will scroll between this position and
@@ -394,7 +389,7 @@ public class BGASwipeBackLayout extends ViewGroup {
         mParallaxBy = parallaxBy;
         requestLayout();
     }
-
+    
     /**
      * @return The distance the lower pane will parallax by when the upper pane is fully closed.
      * @see #setParallaxDistance(int)
@@ -402,7 +397,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public int getParallaxDistance() {
         return mParallaxBy;
     }
-
+    
     /**
      * Set the color used to fade the sliding pane out when it is slid most of the way offscreen.
      *
@@ -411,7 +406,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setSliderFadeColor(@ColorInt int color) {
         mSliderFadeColor = color;
     }
-
+    
     /**
      * @return The ARGB-packed color value used to fade the sliding pane
      */
@@ -419,7 +414,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public int getSliderFadeColor() {
         return mSliderFadeColor;
     }
-
+    
     /**
      * Set the color used to fade the pane covered by the sliding pane out when the pane
      * will become fully covered in the closed state.
@@ -429,7 +424,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setCoveredFadeColor(@ColorInt int color) {
         mCoveredFadeColor = color;
     }
-
+    
     /**
      * @return The ARGB-packed color value used to fade the fixed pane
      */
@@ -437,43 +432,43 @@ public class BGASwipeBackLayout extends ViewGroup {
     public int getCoveredFadeColor() {
         return mCoveredFadeColor;
     }
-
+    
     public void setPanelSlideListener(PanelSlideListener listener) {
         mPanelSlideListener = listener;
     }
-
+    
     void dispatchOnPanelSlide(View panel) {
         // ======================== 新加的 START ========================
         if (mIsWeChatStyle) {
             BGASwipeBackManager.onPanelSlide(mSlideOffset);
         }
         // ======================== 新加的 END ========================
-
+        
         if (mPanelSlideListener != null) {
             mPanelSlideListener.onPanelSlide(panel, mSlideOffset);
         }
     }
-
+    
     void dispatchOnPanelOpened(View panel) {
         if (mPanelSlideListener != null) {
             mPanelSlideListener.onPanelOpened(panel);
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
-
+    
     void dispatchOnPanelClosed(View panel) {
         // ======================== 新加的 START ========================
         if (mIsWeChatStyle) {
             BGASwipeBackManager.onPanelClosed();
         }
         // ======================== 新加的 END ========================
-
+        
         if (mPanelSlideListener != null) {
             mPanelSlideListener.onPanelClosed(panel);
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
-
+    
     void updateObscuredViewsVisibility(View panel) {
         final boolean isLayoutRtl = isLayoutRtlSupport();
         final int startBound = isLayoutRtl ? (getWidth() - getPaddingRight()) : getPaddingLeft();
@@ -492,17 +487,17 @@ public class BGASwipeBackLayout extends ViewGroup {
         } else {
             left = right = top = bottom = 0;
         }
-
+        
         for (int i = 0, childCount = getChildCount(); i < childCount; i++) {
             final View child = getChildAt(i);
-
+            
             if (child == panel) {
                 // There are still more children above the panel but they won't be affected.
                 break;
             } else if (child.getVisibility() == GONE) {
                 continue;
             }
-
+            
             final int clampedChildLeft = Math.max(
                     (isLayoutRtl ? endBound : startBound), child.getLeft());
             final int clampedChildTop = Math.max(topBound, child.getTop());
@@ -519,7 +514,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             child.setVisibility(vis);
         }
     }
-
+    
     void setAllChildrenVisible() {
         for (int i = 0, childCount = getChildCount(); i < childCount; i++) {
             final View child = getChildAt(i);
@@ -528,51 +523,51 @@ public class BGASwipeBackLayout extends ViewGroup {
             }
         }
     }
-
+    
     private static boolean viewIsOpaque(View v) {
         if (v.isOpaque()) {
             return true;
         }
-
+        
         // View#isOpaque didn't take all valid opaque scrollbar modes into account
         // before API 18 (JB-MR2). On newer devices rely solely on isOpaque above and return false
         // here. On older devices, check the view's background drawable directly as a fallback.
         if (Build.VERSION.SDK_INT >= 18) {
             return false;
         }
-
+        
         final Drawable bg = v.getBackground();
         if (bg != null) {
             return bg.getOpacity() == PixelFormat.OPAQUE;
         }
         return false;
     }
-
+    
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mFirstLayout = true;
     }
-
+    
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mFirstLayout = true;
-
+        
         for (int i = 0, count = mPostedRunnables.size(); i < count; i++) {
             final DisableLayerRunnable dlr = mPostedRunnables.get(i);
             dlr.run();
         }
         mPostedRunnables.clear();
     }
-
+    
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
+        
         if (widthMode != MeasureSpec.EXACTLY) {
             if (isInEditMode()) {
                 // Don't crash the layout editor. Consume all of the space if specified
@@ -601,9 +596,9 @@ public class BGASwipeBackLayout extends ViewGroup {
                 throw new IllegalStateException("Height must not be UNSPECIFIED");
             }
         }
-
+        
         int layoutHeight = 0;
-        int maxLayoutHeight = -1;
+        int maxLayoutHeight = 0;
         switch (heightMode) {
             case MeasureSpec.EXACTLY:
                 layoutHeight = maxLayoutHeight = heightSize - getPaddingTop() - getPaddingBottom();
@@ -612,43 +607,45 @@ public class BGASwipeBackLayout extends ViewGroup {
                 maxLayoutHeight = heightSize - getPaddingTop() - getPaddingBottom();
                 break;
         }
-
+        
         // ======================== 新加的 START ========================
-        maxLayoutHeight -= UIUtil.getNavigationBarHeight(mActivity);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            maxLayoutHeight -= UIUtil.getNavigationBarHeight(mActivity);
+        }
         // ======================== 新加的 END ========================
-
+        
         float weightSum = 0;
         boolean canSlide = false;
         final int widthAvailable = widthSize - getPaddingLeft() - getPaddingRight();
         int widthRemaining = widthAvailable;
         final int childCount = getChildCount();
-
+        
         if (childCount > 2) {
             Log.e(TAG, "onMeasure: More than two child views are not supported.");
         }
-
+        
         // We'll find the current one below.
         mSlideableView = null;
-
+        
         // First pass. Measure based on child LayoutParams width/height.
         // Weight will incur a second pass.
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
+    
             if (child.getVisibility() == GONE) {
                 lp.dimWhenOffset = false;
                 continue;
             }
-
+    
             if (lp.weight > 0) {
                 weightSum += lp.weight;
-
+        
                 // If we have no width, weight is the only contributor to the final size.
                 // Measure this view on the weight pass only.
                 if (lp.width == 0) continue;
             }
-
+    
             int childWidthSpec;
             final int horizontalMargin = lp.leftMargin + lp.rightMargin;
             if (lp.width == LayoutParams.WRAP_CONTENT) {
@@ -660,7 +657,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             } else {
                 childWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
             }
-
+    
             int childHeightSpec;
             if (lp.height == LayoutParams.WRAP_CONTENT) {
                 childHeightSpec = MeasureSpec.makeMeasureSpec(maxLayoutHeight, MeasureSpec.AT_MOST);
@@ -669,39 +666,39 @@ public class BGASwipeBackLayout extends ViewGroup {
             } else {
                 childHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
             }
-
+    
             child.measure(childWidthSpec, childHeightSpec);
             final int childWidth = child.getMeasuredWidth();
             final int childHeight = child.getMeasuredHeight();
-
+    
             if (heightMode == MeasureSpec.AT_MOST && childHeight > layoutHeight) {
                 layoutHeight = Math.min(childHeight, maxLayoutHeight);
             }
-
+    
             widthRemaining -= childWidth;
             canSlide |= lp.slideable = widthRemaining < 0;
             if (lp.slideable) {
                 mSlideableView = child;
             }
         }
-
+        
         // Resolve weight and make sure non-sliding panels are smaller than the full screen.
         if (canSlide || weightSum > 0) {
             final int fixedPanelWidthLimit = widthAvailable - mOverhangSize;
-
+    
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
-
+        
                 if (child.getVisibility() == GONE) {
                     continue;
                 }
-
+        
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
+        
                 if (child.getVisibility() == GONE) {
                     continue;
                 }
-
+        
                 final boolean skippedFirstPass = lp.width == 0 && lp.weight > 0;
                 final int measuredWidth = skippedFirstPass ? 0 : child.getMeasuredWidth();
                 if (canSlide && child != mSlideableView) {
@@ -748,7 +745,7 @@ public class BGASwipeBackLayout extends ViewGroup {
                         childHeightSpec = MeasureSpec.makeMeasureSpec(
                                 child.getMeasuredHeight(), MeasureSpec.EXACTLY);
                     }
-
+    
                     if (canSlide) {
                         // Consume available space
                         final int horizontalMargin = lp.leftMargin + lp.rightMargin;
@@ -769,19 +766,19 @@ public class BGASwipeBackLayout extends ViewGroup {
                 }
             }
         }
-
+        
         final int measuredWidth = widthSize;
         final int measuredHeight = layoutHeight + getPaddingTop() + getPaddingBottom();
-
+        
         setMeasuredDimension(measuredWidth, measuredHeight);
         mCanSlide = canSlide;
-
+        
         if (mDragHelper.getViewDragState() != ViewDragHelper.STATE_IDLE && !canSlide) {
             // Cancel scrolling in progress, it's no longer relevant.
             mDragHelper.abort();
         }
     }
-
+    
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final boolean isLayoutRtl = isLayoutRtlSupport();
@@ -794,27 +791,27 @@ public class BGASwipeBackLayout extends ViewGroup {
         final int paddingStart = isLayoutRtl ? getPaddingRight() : getPaddingLeft();
         final int paddingEnd = isLayoutRtl ? getPaddingLeft() : getPaddingRight();
         final int paddingTop = getPaddingTop();
-
+        
         final int childCount = getChildCount();
         int xStart = paddingStart;
         int nextXStart = xStart;
-
+        
         if (mFirstLayout) {
             mSlideOffset = mCanSlide && mPreservedOpenState ? 1.f : 0.f;
         }
-
+        
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
-
+            
             if (child.getVisibility() == GONE) {
                 continue;
             }
-
+            
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
+            
             final int childWidth = child.getMeasuredWidth();
             int offset = 0;
-
+            
             if (lp.slideable) {
                 final int margin = lp.leftMargin + lp.rightMargin;
                 final int range = Math.min(nextXStart,
@@ -831,7 +828,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             } else {
                 xStart = nextXStart;
             }
-
+            
             final int childRight;
             final int childLeft;
             if (isLayoutRtl) {
@@ -841,14 +838,14 @@ public class BGASwipeBackLayout extends ViewGroup {
                 childLeft = xStart - offset;
                 childRight = childLeft + childWidth;
             }
-
+            
             final int childTop = paddingTop;
             final int childBottom = childTop + child.getMeasuredHeight();
             child.layout(childLeft, paddingTop, childRight, childBottom);
-
+            
             nextXStart += child.getWidth();
         }
-
+        
         if (mFirstLayout) {
             if (mCanSlide) {
                 if (mParallaxBy != 0) {
@@ -865,10 +862,10 @@ public class BGASwipeBackLayout extends ViewGroup {
             }
             updateObscuredViewsVisibility(mSlideableView);
         }
-
+        
         mFirstLayout = false;
     }
-
+    
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -877,7 +874,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             mFirstLayout = true;
         }
     }
-
+    
     @Override
     public void requestChildFocus(View child, View focused) {
         super.requestChildFocus(child, focused);
@@ -885,11 +882,11 @@ public class BGASwipeBackLayout extends ViewGroup {
             mPreservedOpenState = child == mSlideableView;
         }
     }
-
+    
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         final int action = MotionEventCompat.getActionMasked(ev);
-
+        
         // Preserve the open state based on the last view that was touched.
         if (!mCanSlide && action == MotionEvent.ACTION_DOWN && getChildCount() > 1) {
             // After the first things will be slideable.
@@ -899,26 +896,26 @@ public class BGASwipeBackLayout extends ViewGroup {
                         (int) ev.getX(), (int) ev.getY());
             }
         }
-
+        
         // ======================== 新加的 START ========================
         if (!isSwipeBackEnable()) {
             mDragHelper.cancel();
             return super.onInterceptTouchEvent(ev);
         }
         // ======================== 新加的 END ========================
-
+        
         if (!mCanSlide || (mIsUnableToDrag && action != MotionEvent.ACTION_DOWN)) {
             mDragHelper.cancel();
             return super.onInterceptTouchEvent(ev);
         }
-
+        
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             mDragHelper.cancel();
             return false;
         }
-
+        
         boolean interceptTap = false;
-
+        
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mIsUnableToDrag = false;
@@ -926,14 +923,14 @@ public class BGASwipeBackLayout extends ViewGroup {
                 final float y = ev.getY();
                 mInitialMotionX = x;
                 mInitialMotionY = y;
-
+    
                 if (mDragHelper.isViewUnder(mSlideableView, (int) x, (int) y)
                         && isDimmed(mSlideableView)) {
                     interceptTap = true;
                 }
                 break;
             }
-
+            
             case MotionEvent.ACTION_MOVE: {
                 final float x = ev.getX();
                 final float y = ev.getY();
@@ -947,12 +944,12 @@ public class BGASwipeBackLayout extends ViewGroup {
                 }
             }
         }
-
+        
         final boolean interceptForDrag = mDragHelper.shouldInterceptTouchEvent(ev);
-
+        
         return interceptForDrag || interceptTap;
     }
-
+    
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         // ======================== 新加的 START ========================
@@ -960,26 +957,32 @@ public class BGASwipeBackLayout extends ViewGroup {
             return super.onTouchEvent(ev);
         }
         // ======================== 新加的 END ========================
-
+        
         if (!mCanSlide) {
             return super.onTouchEvent(ev);
         }
-
+        
         mDragHelper.processTouchEvent(ev);
-
+        
         final int action = ev.getAction();
         boolean wantTouchEvents = true;
-
+        
         switch (action & MotionEventCompat.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
+                mMoveState = MOVE_STATE_LEFT;
                 final float x = ev.getX();
                 final float y = ev.getY();
                 mInitialMotionX = x;
                 mInitialMotionY = y;
                 break;
             }
-
+            
             case MotionEvent.ACTION_UP: {
+                if (mSlideableView.getLeft() > mSlideRange * mSwipeBackThreshold) {
+                    mMoveState = MOVE_STATE_RIGHT;
+                } else {
+                    mMoveState = MOVE_STATE_LEFT;
+                }
                 if (isDimmed(mSlideableView)) {
                     final float x = ev.getX();
                     final float y = ev.getY();
@@ -995,11 +998,23 @@ public class BGASwipeBackLayout extends ViewGroup {
                 }
                 break;
             }
+            
+            case MotionEvent.ACTION_CANCEL: {
+                if (mSlideableView.getLeft() > mSlideRange * mSwipeBackThreshold) {
+                    mMoveState = MOVE_STATE_RIGHT;
+                } else {
+                    mMoveState = MOVE_STATE_LEFT;
+                }
+                break;
+            }
+            
+            default:
+                break;
         }
-
+        
         return wantTouchEvents;
     }
-
+    
     private boolean closePane(View pane, int initialVelocity) {
         if (mFirstLayout || smoothSlideTo(0.f, initialVelocity)) {
             mPreservedOpenState = false;
@@ -1007,7 +1022,7 @@ public class BGASwipeBackLayout extends ViewGroup {
         }
         return false;
     }
-
+    
     private boolean openPane(View pane, int initialVelocity) {
         if (mFirstLayout || smoothSlideTo(1.f, initialVelocity)) {
             mPreservedOpenState = true;
@@ -1015,7 +1030,7 @@ public class BGASwipeBackLayout extends ViewGroup {
         }
         return false;
     }
-
+    
     /**
      * @deprecated Renamed to {@link #openPane()} - this method is going away soon!
      */
@@ -1023,7 +1038,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void smoothSlideOpen() {
         openPane();
     }
-
+    
     /**
      * Open the sliding pane if it is currently slideable. If first layout
      * has already completed this will animate.
@@ -1033,7 +1048,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public boolean openPane() {
         return openPane(mSlideableView, 0);
     }
-
+    
     /**
      * @deprecated Renamed to {@link #closePane()} - this method is going away soon!
      */
@@ -1041,7 +1056,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void smoothSlideClosed() {
         closePane();
     }
-
+    
     /**
      * Close the sliding pane if it is currently slideable. If first layout
      * has already completed this will animate.
@@ -1051,7 +1066,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public boolean closePane() {
         return closePane(mSlideableView, 0);
     }
-
+    
     /**
      * Check if the layout is completely open. It can be open either because the slider
      * itself is open revealing the left pane, or if all content fits without sliding.
@@ -1061,7 +1076,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public boolean isOpen() {
         return !mCanSlide || mSlideOffset == 1;
     }
-
+    
     /**
      * @return true if content in this layout can be slid open and closed
      * @deprecated Renamed to {@link #isSlideable()} - this method is going away soon!
@@ -1070,7 +1085,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public boolean canSlide() {
         return mCanSlide;
     }
-
+    
     /**
      * Check if the content in this layout cannot fully fit side by side and therefore
      * the content pane can be slid back and forth.
@@ -1080,7 +1095,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public boolean isSlideable() {
         return mCanSlide;
     }
-
+    
     void onPanelDragged(int newLeft) {
         if (mSlideableView == null) {
             // This can happen if we're aborting motion during layout because everything now fits.
@@ -1089,24 +1104,38 @@ public class BGASwipeBackLayout extends ViewGroup {
         }
         final boolean isLayoutRtl = isLayoutRtlSupport();
         final LayoutParams lp = (LayoutParams) mSlideableView.getLayoutParams();
-
+        
         int childWidth = mSlideableView.getWidth();
         final int newStart = isLayoutRtl ? getWidth() - newLeft - childWidth : newLeft;
-
+        
         final int paddingStart = isLayoutRtl ? getPaddingRight() : getPaddingLeft();
         final int lpMargin = isLayoutRtl ? lp.rightMargin : lp.leftMargin;
         final int startBound = paddingStart + lpMargin;
-
+        
+        float lastSlideOffset = mSlideOffset;
         mSlideOffset = (float) (newStart - startBound) / mSlideRange;
-
+        float curOffsetDelta = mSlideOffset - lastSlideOffset;
+        if (mMoveState == MOVE_STATE_RIGHT) {
+            if (curOffsetDelta < mLastOffsetDelta) {
+                curOffsetDelta = mLastOffsetDelta;
+                mSlideOffset = lastSlideOffset + curOffsetDelta;
+                mSlideOffset += 0.05f;
+                if (mSlideOffset > 1.0f) {
+                    mSlideOffset = 1.0f;
+                }
+            } else {
+                mLastOffsetDelta = curOffsetDelta;
+            }
+        }
+        
         if (mParallaxBy != 0) {
             parallaxOtherViews(mSlideOffset);
         }
-
+        
         if (lp.dimWhenOffset) {
             dimChildView(mSlideableView, mSlideOffset, mSliderFadeColor);
         }
-
+        
         // ======================== 新加的 START ========================
         if (mIsNeedShowShadow && mShadowView != null) {
             if (mIsShadowAlphaGradient) {
@@ -1115,13 +1144,13 @@ public class BGASwipeBackLayout extends ViewGroup {
             ViewCompat.setTranslationX(mShadowView, -mShadowView.getMeasuredWidth() + newLeft);
         }
         // ======================== 新加的 END ========================
-
+        
         dispatchOnPanelSlide(mSlideableView);
     }
-
+    
     private void dimChildView(View v, float mag, int fadeColor) {
         final LayoutParams lp = (LayoutParams) v.getLayoutParams();
-
+        
         if (mag > 0 && fadeColor != 0) {
             final int baseAlpha = (fadeColor & 0xff000000) >>> 24;
             int imag = (int) (baseAlpha * mag);
@@ -1143,13 +1172,13 @@ public class BGASwipeBackLayout extends ViewGroup {
             ViewCompat.postOnAnimation(this, dlr);
         }
     }
-
+    
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         boolean result;
         final int save = canvas.save(Canvas.CLIP_SAVE_FLAG);
-
+        
         if (mCanSlide && !lp.slideable && mSlideableView != null) {
             // Clip against the slider; no sense drawing what will immediately be covered.
             canvas.getClipBounds(mTmpRect);
@@ -1160,7 +1189,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             }
             canvas.clipRect(mTmpRect);
         }
-
+        
         if (Build.VERSION.SDK_INT >= 11) { // HC
             result = super.drawChild(canvas, child, drawingTime);
         } else {
@@ -1183,16 +1212,16 @@ public class BGASwipeBackLayout extends ViewGroup {
                 result = super.drawChild(canvas, child, drawingTime);
             }
         }
-
+        
         canvas.restoreToCount(save);
-
+        
         return result;
     }
-
+    
     void invalidateChildRegion(View v) {
         IMPL.invalidateChildRegion(this, v);
     }
-
+    
     /**
      * Smoothly animate mDraggingPane to the target X position within its range.
      *
@@ -1204,10 +1233,10 @@ public class BGASwipeBackLayout extends ViewGroup {
             // Nothing to do.
             return false;
         }
-
+    
         final boolean isLayoutRtl = isLayoutRtlSupport();
         final LayoutParams lp = (LayoutParams) mSlideableView.getLayoutParams();
-
+    
         int x;
         if (isLayoutRtl) {
             int startBound = getPaddingRight() + lp.rightMargin;
@@ -1217,7 +1246,7 @@ public class BGASwipeBackLayout extends ViewGroup {
             int startBound = getPaddingLeft() + lp.leftMargin;
             x = (int) (startBound + slideOffset * mSlideRange);
         }
-
+    
         if (mDragHelper.smoothSlideViewTo(mSlideableView, x, mSlideableView.getTop())) {
             setAllChildrenVisible();
             ViewCompat.postInvalidateOnAnimation(this);
@@ -1225,7 +1254,7 @@ public class BGASwipeBackLayout extends ViewGroup {
         }
         return false;
     }
-
+    
     @Override
     public void computeScroll() {
         if (mDragHelper.continueSettling(true)) {
@@ -1233,11 +1262,11 @@ public class BGASwipeBackLayout extends ViewGroup {
                 mDragHelper.abort();
                 return;
             }
-
+    
             ViewCompat.postInvalidateOnAnimation(this);
         }
     }
-
+    
     /**
      * @param d drawable to use as a shadow
      * @deprecated Renamed to {@link #setShadowDrawableLeft(Drawable d)} to support LTR (left to
@@ -1248,7 +1277,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowDrawable(Drawable d) {
         setShadowDrawableLeft(d);
     }
-
+    
     /**
      * Set a drawable to use as a shadow cast by the right pane onto the left pane
      * during opening/closing.
@@ -1258,7 +1287,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowDrawableLeft(Drawable d) {
         mShadowDrawableLeft = d;
     }
-
+    
     /**
      * Set a drawable to use as a shadow cast by the left pane onto the right pane
      * during opening/closing to support right to left language.
@@ -1268,7 +1297,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowDrawableRight(Drawable d) {
         mShadowDrawableRight = d;
     }
-
+    
     /**
      * Set a drawable to use as a shadow cast by the right pane onto the left pane
      * during opening/closing.
@@ -1282,7 +1311,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowResource(@DrawableRes int resId) {
         setShadowDrawable(getResources().getDrawable(resId));
     }
-
+    
     /**
      * Set a drawable to use as a shadow cast by the right pane onto the left pane
      * during opening/closing.
@@ -1292,7 +1321,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowResourceLeft(int resId) {
         setShadowDrawableLeft(ContextCompat.getDrawable(getContext(), resId));
     }
-
+    
     /**
      * Set a drawable to use as a shadow cast by the left pane onto the right pane
      * during opening/closing to support right to left language.
@@ -1302,7 +1331,7 @@ public class BGASwipeBackLayout extends ViewGroup {
     public void setShadowResourceRight(int resId) {
         setShadowDrawableRight(ContextCompat.getDrawable(getContext(), resId));
     }
-
+    
     @Override
     public void draw(Canvas c) {
         super.draw(c);
@@ -1313,16 +1342,16 @@ public class BGASwipeBackLayout extends ViewGroup {
         } else {
             shadowDrawable = mShadowDrawableLeft;
         }
-
+        
         final View shadowView = getChildCount() > 1 ? getChildAt(1) : null;
         if (shadowView == null || shadowDrawable == null) {
             // No need to draw a shadow if we don't have one.
             return;
         }
-
+        
         final int top = shadowView.getTop();
         final int bottom = shadowView.getBottom();
-
+        
         final int shadowWidth = shadowDrawable.getIntrinsicWidth();
         final int left;
         final int right;
@@ -1333,11 +1362,11 @@ public class BGASwipeBackLayout extends ViewGroup {
             right = shadowView.getLeft();
             left = right - shadowWidth;
         }
-
+        
         shadowDrawable.setBounds(left, top, right, bottom);
         shadowDrawable.draw(c);
     }
-
+    
     private void parallaxOtherViews(float slideOffset) {
         final boolean isLayoutRtl = isLayoutRtlSupport();
         final LayoutParams slideLp = (LayoutParams) mSlideableView.getLayoutParams();
@@ -1347,21 +1376,21 @@ public class BGASwipeBackLayout extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             final View v = getChildAt(i);
             if (v == mSlideableView) continue;
-
+    
             final int oldOffset = (int) ((1 - mParallaxOffset) * mParallaxBy);
             mParallaxOffset = slideOffset;
             final int newOffset = (int) ((1 - slideOffset) * mParallaxBy);
             final int dx = oldOffset - newOffset;
-
+    
             v.offsetLeftAndRight(isLayoutRtl ? -dx : dx);
-
+    
             if (dimViews) {
                 dimChildView(v, isLayoutRtl ? mParallaxOffset - 1
                         : 1 - mParallaxOffset, mCoveredFadeColor);
             }
         }
     }
-
+    
     /**
      * Tests scrollability within child views of v given a delta of dx.
      *
@@ -1392,10 +1421,10 @@ public class BGASwipeBackLayout extends ViewGroup {
                 }
             }
         }
-
+    
         return checkV && ViewCompat.canScrollHorizontally(v, (isLayoutRtlSupport() ? dx : -dx));
     }
-
+    
     boolean isDimmed(View child) {
         if (child == null) {
             return false;
@@ -1403,49 +1432,78 @@ public class BGASwipeBackLayout extends ViewGroup {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         return mCanSlide && lp.dimWhenOffset && mSlideOffset > 0;
     }
-
+    
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams();
     }
-
+    
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof MarginLayoutParams
                 ? new LayoutParams((MarginLayoutParams) p)
                 : new LayoutParams(p);
     }
-
+    
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams && super.checkLayoutParams(p);
     }
-
+    
     @Override
     public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LayoutParams(getContext(), attrs);
     }
-
+    
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-
+        
         SavedState ss = new SavedState(superState);
         ss.isOpen = isSlideable() ? isOpen() : mPreservedOpenState;
-
+        
         return ss;
     }
-
+    
+    /**
+     * Listener for monitoring events about sliding panes.
+     */
+    public interface PanelSlideListener {
+        /**
+         * Called when a sliding pane's position changes.
+         *
+         * @param panel       The child view that was moved
+         * @param slideOffset The new offset of this sliding pane within its range, from 0-1
+         */
+        void onPanelSlide(View panel, float slideOffset);
+        
+        /**
+         * Called when a sliding pane becomes slid completely open. The pane may or may not
+         * be interactive at this point depending on how much of the pane is visible.
+         *
+         * @param panel The child view that was slid to an open position, revealing other panes
+         */
+        void onPanelOpened(View panel);
+        
+        /**
+         * Called when a sliding pane becomes slid completely closed. The pane is now guaranteed
+         * to be interactive. It may now obscure other views in the layout.
+         *
+         * @param panel The child view that was slid to a closed position
+         */
+        void onPanelClosed(View panel);
+    }
+    
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
-
+        
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-
+        
         if (ss.isOpen) {
             openPane();
         } else {
@@ -1453,217 +1511,130 @@ public class BGASwipeBackLayout extends ViewGroup {
         }
         mPreservedOpenState = ss.isOpen;
     }
-
-    private class DragHelperCallback extends ViewDragHelper.Callback {
-
-        DragHelperCallback() {
-        }
-
+    
+    rface SlidingPanelLayoutImpl
+    
+    {
+        void invalidateChildRegion (BGASwipeBackLayout parent, View child);
+    }
+    
+    
+    /**
+     * No-op stubs for {@link PanelSlideListener}. If you only want to implement a subset
+     * of the listener methods you can extend this instead of implement the full interface.
+     */
+    public static class SimplePanelSlideListener implements PanelSlideListener {
         @Override
-        public boolean tryCaptureView(View child, int pointerId) {
-            if (mIsUnableToDrag) {
-                return false;
-            }
-
-            // ======================== 新加的 START ========================
-//            return ((LayoutParams) child.getLayoutParams()).slideable;
-
-            if (mIsOnlyTrackingLeftEdge) {
-                return false;
-            }
-            return isSwipeBackEnable() && ((LayoutParams) child.getLayoutParams()).slideable;
-            // ======================== 新加的 END ========================
+        public void onPanelSlide(View panel, float slideOffset) {
         }
-
+        
         @Override
-        public void onViewDragStateChanged(int state) {
-            if (mDragHelper.getViewDragState() == ViewDragHelper.STATE_IDLE) {
-                if (mSlideOffset == 0) {
-                    updateObscuredViewsVisibility(mSlideableView);
-                    dispatchOnPanelClosed(mSlideableView);
-                    mPreservedOpenState = false;
-                } else {
-                    dispatchOnPanelOpened(mSlideableView);
-                    mPreservedOpenState = true;
-                }
-            }
+        public void onPanelOpened(View panel) {
         }
-
+        
         @Override
-        public void onViewCaptured(View capturedChild, int activePointerId) {
-            // Make all child views visible in preparation for sliding things around
-            setAllChildrenVisible();
-        }
-
-        @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            onPanelDragged(left);
-            invalidate();
-        }
-
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            final LayoutParams lp = (LayoutParams) releasedChild.getLayoutParams();
-
-            int left;
-            if (isLayoutRtlSupport()) {
-                int startToRight = getPaddingRight() + lp.rightMargin;
-                if (xvel < 0 || (xvel == 0 && mSlideOffset > 0.5f)) {
-                    startToRight += mSlideRange;
-                }
-                int childWidth = mSlideableView.getWidth();
-                left = getWidth() - startToRight - childWidth;
-            } else {
-                left = getPaddingLeft() + lp.leftMargin;
-                if (xvel > 0 || (xvel == 0 && mSlideOffset > 0.5f)) {
-                    left += mSlideRange;
-                }
-            }
-            mDragHelper.settleCapturedViewAt(left, releasedChild.getTop());
-            invalidate();
-        }
-
-        @Override
-        public int getViewHorizontalDragRange(View child) {
-            return mSlideRange;
-        }
-
-        @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
-            final LayoutParams lp = (LayoutParams) mSlideableView.getLayoutParams();
-
-            final int newLeft;
-            if (isLayoutRtlSupport()) {
-                int startBound = getWidth()
-                        - (getPaddingRight() + lp.rightMargin + mSlideableView.getWidth());
-                int endBound = startBound - mSlideRange;
-                newLeft = Math.max(Math.min(left, startBound), endBound);
-            } else {
-                int startBound = getPaddingLeft() + lp.leftMargin;
-                int endBound = startBound + mSlideRange;
-                newLeft = Math.min(Math.max(left, startBound), endBound);
-            }
-            return newLeft;
-        }
-
-        @Override
-        public int clampViewPositionVertical(View child, int top, int dy) {
-            // Make sure we never move views vertically.
-            // This could happen if the child has less height than its parent.
-            return child.getTop();
-        }
-
-        @Override
-        public void onEdgeDragStarted(int edgeFlags, int pointerId) {
-            // ======================== 新加的 START ========================
-//            mDragHelper.captureChildView(mSlideableView, pointerId);
-
-            if (isSwipeBackEnable()) {
-                mDragHelper.captureChildView(mSlideableView, pointerId);
-            }
-            // ======================== 新加的 END ========================
+        public void onPanelClosed(View panel) {
         }
     }
-
+    
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
         private static final int[] ATTRS = new int[]{
                 android.R.attr.layout_weight
         };
-
+        
         /**
          * The weighted proportion of how much of the leftover space
          * this child should consume after measurement.
          */
         public float weight = 0;
-
+        
         /**
          * True if this pane is the slideable pane in the layout.
          */
         boolean slideable;
-
+        
         /**
          * True if this view should be drawn dimmed
          * when it's been offset from its default position.
          */
         boolean dimWhenOffset;
-
+        
         Paint dimPaint;
-
+        
         public LayoutParams() {
             super(MATCH_PARENT, MATCH_PARENT);
         }
-
+        
         public LayoutParams(int width, int height) {
             super(width, height);
         }
-
+        
         public LayoutParams(android.view.ViewGroup.LayoutParams source) {
             super(source);
         }
-
+        
         public LayoutParams(MarginLayoutParams source) {
             super(source);
         }
-
+        
         public LayoutParams(LayoutParams source) {
             super(source);
             this.weight = source.weight;
         }
-
+        
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
-
+            
             final TypedArray a = c.obtainStyledAttributes(attrs, ATTRS);
             this.weight = a.getFloat(0, 0);
             a.recycle();
         }
-
+        
     }
-
+    
+    inte
     static class SavedState extends AbsSavedState {
-        boolean isOpen;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        SavedState(Parcel in, ClassLoader loader) {
-            super(in, loader);
-            isOpen = in.readInt() != 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeInt(isOpen ? 1 : 0);
-        }
-
         public static final Creator<SavedState> CREATOR = ParcelableCompat.newCreator(
                 new ParcelableCompatCreatorCallbacks<SavedState>() {
                     @Override
                     public SavedState createFromParcel(Parcel in, ClassLoader loader) {
                         return new SavedState(in, loader);
                     }
-
+                
                     @Override
                     public SavedState[] newArray(int size) {
                         return new SavedState[size];
                     }
                 });
+        boolean isOpen;
+    
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+    
+        SavedState(Parcel in, ClassLoader loader) {
+            super(in, loader);
+            isOpen = in.readInt() != 0;
+        }
+    
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(isOpen ? 1 : 0);
+        }
     }
-
-    interface SlidingPanelLayoutImpl {
-        void invalidateChildRegion(BGASwipeBackLayout parent, View child);
-    }
-
-    static class SlidingPanelLayoutImplBase implements SlidingPanelLayoutImpl {
+    
+    stat
+    ic
+    
+    class SlidingPanelLayoutImplBase implements SlidingPanelLayoutImpl {
         @Override
         public void invalidateChildRegion(BGASwipeBackLayout parent, View child) {
             ViewCompat.postInvalidateOnAnimation(parent, child.getLeft(), child.getTop(),
                     child.getRight(), child.getBottom());
         }
     }
-
+    
     static class SlidingPanelLayoutImplJB extends SlidingPanelLayoutImplBase {
         /*
          * Private API hacks! Nasty! Bad!
@@ -1675,7 +1646,7 @@ public class BGASwipeBackLayout extends ViewGroup {
          */
         private Method mGetDisplayList;
         private Field mRecreateDisplayList;
-
+        
         SlidingPanelLayoutImplJB() {
             try {
                 mGetDisplayList = View.class.getDeclaredMethod("getDisplayList", (Class[]) null);
@@ -1689,7 +1660,7 @@ public class BGASwipeBackLayout extends ViewGroup {
                 Log.e(TAG, "Couldn't fetch mRecreateDisplayList field; dimming will be slow.", e);
             }
         }
-
+        
         @Override
         public void invalidateChildRegion(BGASwipeBackLayout parent, View child) {
             if (mGetDisplayList != null && mRecreateDisplayList != null) {
@@ -1707,33 +1678,155 @@ public class BGASwipeBackLayout extends ViewGroup {
             super.invalidateChildRegion(parent, child);
         }
     }
-
+    
     static class SlidingPanelLayoutImplJBMR1 extends SlidingPanelLayoutImplBase {
         @Override
         public void invalidateChildRegion(BGASwipeBackLayout parent, View child) {
             ViewCompat.setLayerPaint(child, ((LayoutParams) child.getLayoutParams()).dimPaint);
         }
     }
-
-    class AccessibilityDelegate extends AccessibilityDelegateCompat {
+    
+    clas
+    
+    private class DragHelperCallback extends ViewDragHelper.Callback {
+        
+        DragHelperCallback() {
+        }
+        
+        @Override
+        public boolean tryCaptureView(View child, int pointerId) {
+            if (mIsUnableToDrag) {
+                return false;
+            }
+            
+            // ======================== 新加的 START ========================
+//            return ((LayoutParams) child.getLayoutParams()).slideable;
+            
+            if (mIsOnlyTrackingLeftEdge) {
+                return false;
+            }
+            return isSwipeBackEnable() && ((LayoutParams) child.getLayoutParams()).slideable;
+            // ======================== 新加的 END ========================
+        }
+        
+        @Override
+        public void onViewDragStateChanged(int state) {
+            if (mDragHelper.getViewDragState() == ViewDragHelper.STATE_IDLE) {
+                if (mSlideOffset == 0) {
+                    updateObscuredViewsVisibility(mSlideableView);
+                    dispatchOnPanelClosed(mSlideableView);
+                    mPreservedOpenState = false;
+                } else {
+                    dispatchOnPanelOpened(mSlideableView);
+                    mPreservedOpenState = true;
+                }
+                // ======================== 新加的 START ========================
+//            }
+                mIsSliding = false;
+            } else {
+                mIsSliding = true;
+            }
+            // ======================== 新加的 END ========================
+        }
+        
+        @Override
+        public void onViewCaptured(View capturedChild, int activePointerId) {
+            // Make all child views visible in preparation for sliding things around
+            setAllChildrenVisible();
+        }
+        
+        @Override
+        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            onPanelDragged(left);
+            invalidate();
+        }
+        
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            final LayoutParams lp = (LayoutParams) releasedChild.getLayoutParams();
+            
+            int left;
+            if (isLayoutRtlSupport()) {
+                int startToRight = getPaddingRight() + lp.rightMargin;
+                if (xvel < 0 || (xvel == 0 && mSlideOffset > mSwipeBackThreshold)) {
+                    startToRight += mSlideRange;
+                }
+                int childWidth = mSlideableView.getWidth();
+                left = getWidth() - startToRight - childWidth;
+            } else {
+                left = getPaddingLeft() + lp.leftMargin;
+                if (xvel > 0 || (xvel == 0 && mSlideOffset > mSwipeBackThreshold)) {
+                    left += mSlideRange;
+                }
+            }
+            mDragHelper.settleCapturedViewAt(left, releasedChild.getTop());
+            invalidate();
+        }
+        
+        @Override
+        public int getViewHorizontalDragRange(View child) {
+            return mSlideRange;
+        }
+        
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            final LayoutParams lp = (LayoutParams) mSlideableView.getLayoutParams();
+            
+            final int newLeft;
+            if (isLayoutRtlSupport()) {
+                int startBound = getWidth()
+                        - (getPaddingRight() + lp.rightMargin + mSlideableView.getWidth());
+                int endBound = startBound - mSlideRange;
+                newLeft = Math.max(Math.min(left, startBound), endBound);
+            } else {
+                int startBound = getPaddingLeft() + lp.leftMargin;
+                int endBound = startBound + mSlideRange;
+                newLeft = Math.min(Math.max(left, startBound), endBound);
+            }
+            return newLeft;
+        }
+        
+        @Override
+        public int clampViewPositionVertical(View child, int top, int dy) {
+            // Make sure we never move views vertically.
+            // This could happen if the child has less height than its parent.
+            return child.getTop();
+        }
+        
+        @Override
+        public void onEdgeDragStarted(int edgeFlags, int pointerId) {
+            // ======================== 新加的 START ========================
+//            mDragHelper.captureChildView(mSlideableView, pointerId);
+            
+            if (isSwipeBackEnable()) {
+                mDragHelper.captureChildView(mSlideableView, pointerId);
+            }
+            // ======================== 新加的 END ========================
+        }
+    }
+    
+    priv
+    s AccessibilityDelegate extends AccessibilityDelegateCompat
+    
+    {
         private final Rect mTmpRect = new Rect();
-
+        
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
             final AccessibilityNodeInfoCompat superNode = AccessibilityNodeInfoCompat.obtain(info);
             super.onInitializeAccessibilityNodeInfo(host, superNode);
             copyNodeInfoNoChildren(info, superNode);
             superNode.recycle();
-
-            info.setClassName(BGASwipeBackLayout.class.getName());
+        
+        info.setClassName(BGASwipeBackLayout.class.getName());
             info.setSource(host);
-
-            final ViewParent parent = ViewCompat.getParentForAccessibility(host);
+        
+        final ViewParent parent = ViewCompat.getParentForAccessibility(host);
             if (parent instanceof View) {
                 info.setParent((View) parent);
             }
-
-            // This is a best-approximation of addChildrenForAccessibility()
+        
+        // This is a best-approximation of addChildrenForAccessibility()
             // that accounts for filtering.
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -1746,14 +1839,14 @@ public class BGASwipeBackLayout extends ViewGroup {
                 }
             }
         }
-
+        
         @Override
         public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
             super.onInitializeAccessibilityEvent(host, event);
-
-            event.setClassName(BGASwipeBackLayout.class.getName());
+        
+        event.setClassName(BGASwipeBackLayout.class.getName());
         }
-
+        
         @Override
         public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
                                                        AccessibilityEvent event) {
@@ -1762,12 +1855,12 @@ public class BGASwipeBackLayout extends ViewGroup {
             }
             return false;
         }
-
-        public boolean filter(View child) {
+    
+    public boolean filter(View child) {
             return isDimmed(child);
         }
-
-        /**
+    
+    /**
          * This should really be in AccessibilityNodeInfoCompat, but there unfortunately
          * seem to be a few elements that are not easily cloneable using the underlying API.
          * Leave it private here as it's not general-purpose useful.
@@ -1775,18 +1868,18 @@ public class BGASwipeBackLayout extends ViewGroup {
         private void copyNodeInfoNoChildren(AccessibilityNodeInfoCompat dest,
                                             AccessibilityNodeInfoCompat src) {
             final Rect rect = mTmpRect;
-
+    
             src.getBoundsInParent(rect);
             dest.setBoundsInParent(rect);
-
+    
             src.getBoundsInScreen(rect);
             dest.setBoundsInScreen(rect);
-
+    
             dest.setVisibleToUser(src.isVisibleToUser());
             dest.setPackageName(src.getPackageName());
             dest.setClassName(src.getClassName());
             dest.setContentDescription(src.getContentDescription());
-
+    
             dest.setEnabled(src.isEnabled());
             dest.setClickable(src.isClickable());
             dest.setFocusable(src.isFocusable());
@@ -1794,21 +1887,24 @@ public class BGASwipeBackLayout extends ViewGroup {
             dest.setAccessibilityFocused(src.isAccessibilityFocused());
             dest.setSelected(src.isSelected());
             dest.setLongClickable(src.isLongClickable());
-
+    
             dest.addAction(src.getActions());
-
+    
             dest.setMovementGranularities(src.getMovementGranularities());
         }
     }
+    
+    bool
+            ate
 
-    private class DisableLayerRunnable implements Runnable {
+class DisableLayerRunnable implements Runnable {
         final View mChildView;
-
-        DisableLayerRunnable(View childView) {
+    
+    DisableLayerRunnable(View childView) {
             mChildView = childView;
         }
-
-        @Override
+    
+    @Override
         public void run() {
             if (mChildView.getParent() == this) {
                 ViewCompat.setLayerType(mChildView, ViewCompat.LAYER_TYPE_NONE, null);
@@ -1817,8 +1913,8 @@ public class BGASwipeBackLayout extends ViewGroup {
             mPostedRunnables.remove(this);
         }
     }
-
-    boolean isLayoutRtlSupport() {
+    
+    ean isLayoutRtlSupport() {
         return ViewCompat.getLayoutDirection(this) == ViewCompat.LAYOUT_DIRECTION_RTL;
     }
 }

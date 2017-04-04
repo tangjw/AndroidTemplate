@@ -212,14 +212,9 @@ public class SelectImageImpl implements SelectImage {
     
             case TConstant.RC_CROP:
                 if (resultCode == Activity.RESULT_OK) {
-                    try {
-                        TImage image = TImage.of(TUriParse.getFilePathWithUri(cropImageUri, contextWrap.getActivity()), fromType);
-                        image.setCropped(true);
-                        handleResult(TResult.of(image), null);
-                    } catch (TException e) {
-                        handleResult(null, e.getDetailMessage());
-                        e.printStackTrace();
-                    }
+                    TImage image = TImage.of(cropImageUri, fromType);
+                    image.setCropped(true);
+                    handleResult(TResult.of(image), null);
     
                 } else {
                     listener.selectCancel();

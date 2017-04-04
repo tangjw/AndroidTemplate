@@ -33,12 +33,34 @@ import java.util.Stack;
 public class BGASwipeBackManager implements Application.ActivityLifecycleCallbacks {
     private static final BGASwipeBackManager sInstance = new BGASwipeBackManager();
     private Stack<Activity> mActivityStack = new Stack<>();
+    
+    private BGASwipeBackManager() {
+    }
 
     public static BGASwipeBackManager getInstance() {
         return sInstance;
     }
-
-    private BGASwipeBackManager() {
+    
+    public static void onPanelSlide(float slideOffset) {
+        try {
+            Activity activity = getInstance().getPenultimateActivity();
+            if (activity != null) {
+                View decorView = activity.getWindow().getDecorView();
+                ViewCompat.setTranslationX(decorView, -(decorView.getMeasuredWidth() / 3.0f) * (1 - slideOffset));
+            }
+        } catch (Exception e) {
+        }
+    }
+    
+    public static void onPanelClosed() {
+        try {
+            Activity activity = getInstance().getPenultimateActivity();
+            if (activity != null) {
+                View decorView = activity.getWindow().getDecorView();
+                ViewCompat.setTranslationX(decorView, 0);
+            }
+        } catch (Exception e) {
+        }
     }
 
     /**
@@ -93,27 +115,5 @@ public class BGASwipeBackManager implements Application.ActivityLifecycleCallbac
         } catch (Exception e) {
         }
         return activity;
-    }
-
-    public static void onPanelSlide(float slideOffset) {
-        try {
-            Activity activity = getInstance().getPenultimateActivity();
-            if (activity != null) {
-                View decorView = activity.getWindow().getDecorView();
-                ViewCompat.setTranslationX(decorView, -(decorView.getMeasuredWidth() / 3.0f) * (1 - slideOffset));
-            }
-        } catch (Exception e) {
-        }
-    }
-
-    public static void onPanelClosed() {
-        try {
-            Activity activity = getInstance().getPenultimateActivity();
-            if (activity != null) {
-                View decorView = activity.getWindow().getDecorView();
-                ViewCompat.setTranslationX(decorView, 0);
-            }
-        } catch (Exception e) {
-        }
     }
 }

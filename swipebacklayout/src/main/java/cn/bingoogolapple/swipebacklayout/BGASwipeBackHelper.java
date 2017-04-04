@@ -19,6 +19,7 @@ package cn.bingoogolapple.swipebacklayout;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.FloatRange;
 import android.view.View;
 
 /**
@@ -30,12 +31,33 @@ public class BGASwipeBackHelper {
     private Activity mActivity;
     private Delegate mDelegate;
     private BGASwipeBackLayout mSwipeBackLayout;
-    
+
     public BGASwipeBackHelper(Activity activity, Delegate delegate) {
         mActivity = activity;
         mDelegate = delegate;
-        
+
         initSwipeBackFinish();
+    }
+    
+    /**
+     * 执行跳转到下一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
+     */
+    public static void executeForwardAnim(Activity activity) {
+        activity.overridePendingTransition(R.anim.bga_sbl_activity_forward_enter, R.anim.bga_sbl_activity_forward_exit);
+    }
+    
+    /**
+     * 执行回到到上一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
+     */
+    public static void executeBackwardAnim(Activity activity) {
+        activity.overridePendingTransition(R.anim.bga_sbl_activity_backward_enter, R.anim.bga_sbl_activity_backward_exit);
+    }
+    
+    /**
+     * 执行滑动返回到到上一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
+     */
+    public static void executeSwipeBackAnim(Activity activity) {
+        activity.overridePendingTransition(R.anim.bga_sbl_activity_swipeback_enter, R.anim.bga_sbl_activity_swipeback_exit);
     }
     
     /**
@@ -52,15 +74,15 @@ public class BGASwipeBackHelper {
                     if (slideOffset < 0.03) {
                         BGAKeyboardUtil.closeKeyboard(mActivity);
                     }
-                    
+    
                     mDelegate.onSwipeBackLayoutSlide(slideOffset);
                 }
-                
+    
                 @Override
                 public void onPanelOpened(View panel) {
                     mDelegate.onSwipeBackLayoutExecuted();
                 }
-                
+    
                 @Override
                 public void onPanelClosed(View panel) {
                     mDelegate.onSwipeBackLayoutCancel();
@@ -148,6 +170,30 @@ public class BGASwipeBackHelper {
     }
     
     /**
+     * 设置触发释放后自动滑动返回的阈值，默认值为 0.3f
+     *
+     * @param threshold
+     */
+    public BGASwipeBackHelper setSwipeBackThreshold(@FloatRange(from = 0.0f, to = 1.0f) float threshold) {
+        if (mSwipeBackLayout != null) {
+            mSwipeBackLayout.setSwipeBackThreshold(threshold);
+        }
+        return this;
+    }
+    
+    /**
+     * 是否正在滑动
+     *
+     * @return
+     */
+    public boolean isSliding() {
+        if (mSwipeBackLayout != null) {
+            return mSwipeBackLayout.isSliding();
+        }
+        return false;
+    }
+    
+    /**
      * 执行跳转到下一个 Activity 的动画
      */
     public void executeForwardAnim() {
@@ -166,27 +212,6 @@ public class BGASwipeBackHelper {
      */
     public void executeSwipeBackAnim() {
         executeSwipeBackAnim(mActivity);
-    }
-    
-    /**
-     * 执行跳转到下一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
-     */
-    public static void executeForwardAnim(Activity activity) {
-        activity.overridePendingTransition(R.anim.bga_sbl_activity_forward_enter, R.anim.bga_sbl_activity_forward_exit);
-    }
-    
-    /**
-     * 执行回到到上一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
-     */
-    public static void executeBackwardAnim(Activity activity) {
-        activity.overridePendingTransition(R.anim.bga_sbl_activity_backward_enter, R.anim.bga_sbl_activity_backward_exit);
-    }
-    
-    /**
-     * 执行滑动返回到到上一个 Activity 的动画。这里弄成静态方法，方便在 Fragment 中调用
-     */
-    public static void executeSwipeBackAnim(Activity activity) {
-        activity.overridePendingTransition(R.anim.bga_sbl_activity_swipeback_enter, R.anim.bga_sbl_activity_swipeback_exit);
     }
     
     /**
