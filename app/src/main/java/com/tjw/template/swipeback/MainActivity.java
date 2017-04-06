@@ -73,10 +73,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     
     }
     
-    @Override
-    public boolean isSupportSwipeBack() {
-        return false;
-    }
     
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -112,10 +108,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     }
     
     
-    
-    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+    private class SectionsPagerAdapter extends FragmentStatePagerAdapter {
         
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
         

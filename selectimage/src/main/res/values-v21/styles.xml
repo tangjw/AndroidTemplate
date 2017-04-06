@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="MultiImageSelectTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="MultiImageSelectTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/multiple_image_select_primary</item>
         <item name="colorPrimaryDark">@color/multiple_image_select_primaryDark</item>
         <item name="colorAccent">@color/multiple_image_select_accent</item>

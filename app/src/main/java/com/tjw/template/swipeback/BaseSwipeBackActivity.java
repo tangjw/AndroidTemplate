@@ -1,26 +1,30 @@
 package com.tjw.template.swipeback;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.annotation.IntRange;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
+import com.tjw.swipeback.SwipeBackLayout;
 import com.tjw.template.util.ActivityStackUtils;
-import com.tjw.template.util.StatusBarUtil;
 
 /**
  * ^-^
- * 必须在 Application 的 onCreate 方法中执行 BGASwipeBackManager.getInstance().init(this)
- * 来初始化滑动返回
- * Created by tang-jw on 2017/3/7.
+ * Created by tang-jw on 2017/4/6.
  */
 
-public abstract class BaseActivity extends AppCompatActivity {
-
+public abstract class BaseSwipeBackActivity extends AppCompatActivity implements SwipeBackLayout.SwipeBackListener {
+    
+    private SwipeBackLayout mSwipeBackLayout;
+    private View mChild_bg;
+    
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         // 在 super.onCreate(savedInstanceState) 之前调用该方法
@@ -30,8 +34,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         // 将BaseActivity 添加到栈管理
         ActivityStackUtils.getInstance().addActivity(this);
         
-        
-        initView(savedInstanceState);
+        initView();
         
         setListener();
         
@@ -39,8 +42,38 @@ public abstract class BaseActivity extends AppCompatActivity {
         
     }
     
-    protected void loadData() {
+    @Override
+    public void setContentView(@LayoutRes int layoutResID) {
+        super.setContentView(getSwipeBackContainer());
+        mSwipeBackLayout.addView(LayoutInflater.from(this).inflate(layoutResID, null));
+    }
     
+    private View getSwipeBackContainer() {
+        FrameLayout container = new FrameLayout(this);
+        mSwipeBackLayout = new SwipeBackLayout(this);
+        mSwipeBackLayout.setDragEdge(SwipeBackLayout.DragEdge.LEFT);
+        mSwipeBackLayout.setOnSwipeBackListener(this);
+        
+        mSwipeBackLayout.setEnableFlingBack(true);
+        
+        mSwipeBackLayout.setOnlyLeftEdgeSwipe(false);
+        
+        mChild_bg = new View(this);
+        mChild_bg.setBackgroundColor(0x7f000000);
+        container.addView(mChild_bg, new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        
+        container.addView(mSwipeBackLayout);
+        
+        return container;
+    }
+    
+    @Override
+    public void onViewPositionChanged(float fractionAnchor, float fractionScreen) {
+        mChild_bg.setAlpha(1 - fractionScreen);
+    }
+    
+    protected void loadData() {
+        
     }
     
     protected void beforeSuperCreate(@Nullable Bundle savedInstanceState) {
@@ -52,21 +85,20 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
     
     
-    
-    protected abstract void initView(Bundle savedInstanceState);
+    protected abstract void initView();
     
     protected void setListener() {
         
     }
     
     
-    protected void setStatusBarColor(@ColorInt int color) {
+   /* protected void setStatusBarColor(@ColorInt int color) {
         setStatusBarColor(color, StatusBarUtil.DEFAULT_STATUS_BAR_ALPHA);
     }
     
     protected void setStatusBarColor(@ColorInt int color, @IntRange(from = 0, to = 255) int statusBarAlpha) {
         StatusBarUtil.setColorForSwipeBack(this, color, statusBarAlpha);
-    }
+    }*/
     
     /**
      * activity.finish() 操作 使用 ActivityStackUtils 进行管理
@@ -76,5 +108,4 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onDestroy();
         ActivityStackUtils.getInstance().finishActivity();
     }
-    
 }

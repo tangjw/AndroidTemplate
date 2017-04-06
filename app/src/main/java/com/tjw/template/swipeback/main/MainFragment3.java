@@ -40,7 +40,6 @@ public class MainFragment3 extends BaseFragment {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(mActivity, CameraActivity2.class));
-                
             }
         });
     }

@@ -1,1 +1,1 @@
-include ':app', ':swipebacklayout', ':selectimage'
+include ':app', ':selectimage', ':swipeback'

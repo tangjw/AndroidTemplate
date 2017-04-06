@@ -25,7 +25,7 @@ import com.tjw.selectimage.permission.InvokeListener;
 import com.tjw.selectimage.permission.PermissionManager;
 import com.tjw.selectimage.permission.TakePhotoInvocationHandler;
 import com.tjw.template.R;
-import com.tjw.template.swipeback.BaseActivity;
+import com.tjw.template.swipeback.BaseSwipeBackActivity;
 import com.tjw.template.util.ViewHolder;
 import com.tjw.template.widget.RatioImageView;
 
@@ -37,7 +37,7 @@ import java.util.UUID;
  * Created by tang-jw on 2017/3/16.
  */
 
-public class CameraActivity2 extends BaseActivity implements SelectImage.SelectResultListener, InvokeListener {
+public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImage.SelectResultListener, InvokeListener {
     
     private ImageView mImageView;
     
@@ -63,7 +63,7 @@ public class CameraActivity2 extends BaseActivity implements SelectImage.SelectR
     }
     
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView() {
         setContentView(R.layout.activity_camera);
         mImageView = (ImageView) findViewById(R.id.imageView);
         mGridView = (GridView) findViewById(R.id.gv_img);
