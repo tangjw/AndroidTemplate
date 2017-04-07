@@ -3,7 +3,7 @@ package com.tjw.template.util;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 
-import com.orhanobut.logger.Logger;
+import com.tjw.selectimage.uitl.L;
 
 import java.util.Stack;
 
@@ -14,8 +14,11 @@ import java.util.Stack;
 
 public class ActivityStackUtils {
     
+    private static final String TAG = "ActivityStackUtils";
+    
     private static ActivityStackUtils sInstance;
     private static Stack<Activity> sActivityStack;
+    private boolean isRemoved;
     
     private ActivityStackUtils() {
     }
@@ -42,10 +45,14 @@ public class ActivityStackUtils {
     /**
      * 结束当前 Activity
      */
-    public void finishActivity() {
+    public boolean removeActivity() {
+        if (isRemoved) {
+            return true;
+        }
         Activity activity = sActivityStack.lastElement();
         finishActivity(activity);
-        
+    
+        return false;
     }
     
     /**
@@ -53,16 +60,15 @@ public class ActivityStackUtils {
      */
     public void finishActivity(@NonNull Activity activity) {
         
-        if (!activity.isFinishing()) {
-            Logger.e("finish -->" + activity.getClass().getSimpleName());
-            activity.finish();
-        }
-        
         if (sActivityStack.contains(activity)) {
             sActivityStack.remove(activity);
-            Logger.e("remove stack -->" + activity.getClass().getSimpleName());
+            L.d(TAG, "remove => " + activity.getLocalClassName());
+            isRemoved = true;
+            activity.finish();
+            isRemoved = false;
         }
-        
+    
+    
     }
     
     
@@ -120,13 +126,13 @@ public class ActivityStackUtils {
      * 在logcat里打印栈内所有 Activity 类名
      */
     public void showAllActivity() {
-        
+        String stackInfo = "";
         for (int i = 0; i < sActivityStack.size(); i++) {
             Activity activity = sActivityStack.get(i);
     
-            Logger.i(activity.getClass().getSimpleName());
+            stackInfo += activity.getLocalClassName() + "\n";
         }
-        
+        L.i(TAG, stackInfo);
     }
     
 }

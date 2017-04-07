@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"/>
 
-    <com.tjw.selectimage.album.widget.PaddingToFrameLayout
+    <com.tjw.selectimage.album.widget.PaddingTopFrameLayout
         android:layout_width="match_parent"
         android:id="@+id/paddinglayout"
         android:layout_height="wrap_content">
@@ -46,6 +46,6 @@
 
 
         </android.support.design.widget.AppBarLayout>
-    </com.tjw.selectimage.album.widget.PaddingToFrameLayout>
+    </com.tjw.selectimage.album.widget.PaddingTopFrameLayout>
 
 </RelativeLayout>

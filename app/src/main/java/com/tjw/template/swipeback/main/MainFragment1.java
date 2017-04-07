@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.orhanobut.logger.Logger;
 import com.tjw.template.R;
 import com.tjw.template.bean.Repo;
 import com.tjw.template.bottomnav.BaseFragment;
@@ -109,7 +108,7 @@ public class MainFragment1 extends BaseFragment {
                     
                     @Override
                     public void onNext(List<Repo> repos) {
-                        Logger.d(repos.get(0).getArchive_url());
+//                        Logger.d(repos.get(0).getArchive_url());
     
                         mAdapter.setDataList(repos);
                         

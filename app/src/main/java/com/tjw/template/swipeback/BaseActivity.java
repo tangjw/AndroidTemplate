@@ -20,7 +20,7 @@ import com.tjw.template.util.StatusBarUtil;
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
-
+    
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         // 在 super.onCreate(savedInstanceState) 之前调用该方法
@@ -31,7 +31,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         ActivityStackUtils.getInstance().addActivity(this);
         
         
-        initView(savedInstanceState);
+        initView();
         
         setListener();
         
@@ -52,8 +52,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
     
     
-    
-    protected abstract void initView(Bundle savedInstanceState);
+    protected abstract void initView();
     
     protected void setListener() {
         
@@ -72,9 +71,9 @@ public abstract class BaseActivity extends AppCompatActivity {
      * activity.finish() 操作 使用 ActivityStackUtils 进行管理
      */
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ActivityStackUtils.getInstance().finishActivity();
+    public void finish() {
+        if (ActivityStackUtils.getInstance().removeActivity()) {
+            super.finish();
+        }
     }
-    
 }

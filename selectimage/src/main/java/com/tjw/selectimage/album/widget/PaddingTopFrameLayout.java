@@ -13,16 +13,16 @@ import android.widget.FrameLayout;
  * Created by tang-jw on 2017/3/22.
  */
 
-public class PaddingToFrameLayout extends FrameLayout {
-    public PaddingToFrameLayout(@NonNull Context context) {
+public class PaddingTopFrameLayout extends FrameLayout {
+    public PaddingTopFrameLayout(@NonNull Context context) {
         this(context, null);
     }
     
-    public PaddingToFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public PaddingTopFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
     
-    public PaddingToFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
+    public PaddingTopFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setPaddingTop();
     }

@@ -26,6 +26,7 @@ import com.tjw.selectimage.permission.PermissionManager;
 import com.tjw.selectimage.permission.TakePhotoInvocationHandler;
 import com.tjw.template.R;
 import com.tjw.template.swipeback.BaseSwipeBackActivity;
+import com.tjw.template.util.ActivityStackUtils;
 import com.tjw.template.util.ViewHolder;
 import com.tjw.template.widget.RatioImageView;
 
@@ -44,8 +45,6 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
     private InvokeParam mInvokeParam;
     
     private SelectImage mSelectImage;
-    
-    private GridView mGridView;
     
     private MyAdapter2 mAdapter;
     
@@ -67,13 +66,13 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
     protected void initView() {
         setContentView(R.layout.activity_camera);
         mImageView = (ImageView) findViewById(R.id.imageView);
-        mGridView = (GridView) findViewById(R.id.gv_img);
+        GridView gridView = (GridView) findViewById(R.id.gv_img);
         mSelectedImage2s = new ArrayList<>();
     
         mAdapter = new MyAdapter2();
     
-        mGridView.setAdapter(mAdapter);
-    
+        gridView.setAdapter(mAdapter);
+        ActivityStackUtils.getInstance().showAllActivity();
     }
     
     @Override
@@ -145,6 +144,7 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
         return builder.create();
     }
     
+    @SuppressWarnings("all")
     public void setAvatar(View view) {
         
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -186,16 +186,12 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
     private class MyAdapter2 extends BaseAdapter {
         
         private ArrayList<TImage> mSelectedImgList;
-        
-        public MyAdapter2() {
+    
+        MyAdapter2() {
             mSelectedImgList = new ArrayList<>();
         }
     
-        public ArrayList<TImage> getSelectedImgList() {
-            return mSelectedImgList;
-        }
-        
-        public void setSelectedImgList(ArrayList<TImage> selectedImgList) {
+        void setSelectedImgList(ArrayList<TImage> selectedImgList) {
             mSelectedImgList = selectedImgList;
             notifyDataSetChanged();
         }

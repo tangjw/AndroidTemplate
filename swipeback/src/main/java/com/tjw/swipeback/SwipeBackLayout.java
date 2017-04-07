@@ -83,7 +83,7 @@ public class SwipeBackLayout extends ViewGroup {
      */
     private boolean enablePullToBack = true;
     
-    private static final float BACK_FACTOR = 0.40f;
+    private static final float BACK_FACTOR = 0.382f;
     
     /**
      * the anchor of calling finish.

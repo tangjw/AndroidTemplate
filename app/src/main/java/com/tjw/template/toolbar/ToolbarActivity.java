@@ -1,6 +1,5 @@
 package com.tjw.template.toolbar;
 
-import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -20,7 +19,7 @@ public class ToolbarActivity extends BaseActivity {
     private Toolbar mToolbar;
     
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView() {
         setContentView(R.layout.activity_toolbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
     

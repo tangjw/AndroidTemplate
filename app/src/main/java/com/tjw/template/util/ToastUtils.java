@@ -1,4 +1,4 @@
-package com.tjw.template.widget;
+package com.tjw.template.util;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -8,7 +8,7 @@ import android.widget.Toast;
 /**
  * 自定义的Toast 避免Toast长时间不消失 Created by tang-jw on 2016/6/3.
  */
-public class MyToast {
+public class ToastUtils {
 
     private static Toast mToast;
 
@@ -21,7 +21,7 @@ public class MyToast {
         }
         mToast.setDuration(length);
         mToast.setText(text);
-//		mToast.setGravity(Gravity.CENTER, mToast.getXOffset() / 2, mToast.getYOffset() / 2);
+    
         mToast.setGravity(Gravity.CENTER, mToast.getXOffset() / 2, 4 * mToast.getYOffset() / 5);
 
         mToast.show();

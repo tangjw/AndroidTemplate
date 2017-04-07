@@ -18,8 +18,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
-            android:name=".swipeback.MainActivity"
+            android:name=".swipeback.SplashActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -27,6 +28,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+
+        <activity
+            android:name=".swipeback.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
+
         </activity>
         <activity
             android:name=".ScrollingActivity"
@@ -60,6 +69,14 @@
             android:theme="@style/AppTheme.SwipeBack">
 
         </activity>
+
+        <activity
+            android:name=".swipeback.WebActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.SwipeBack"/>
+
     </application>
 
 </manifest>
