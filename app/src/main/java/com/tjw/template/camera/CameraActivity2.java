@@ -44,6 +44,7 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
     private InvokeParam mInvokeParam;
     
     private SelectImage mSelectImage;
+    
     private GridView mGridView;
     
     private MyAdapter2 mAdapter;
@@ -101,11 +102,6 @@ public class CameraActivity2 extends BaseSwipeBackActivity implements SelectImag
     
     
         mAdapter.setSelectedImgList(mSelectedImage2s);
-        
-        
-        for (TImage img : result.getImages()) {
-            System.out.println(img.getOriginalPath());
-        }
         
     }
     
