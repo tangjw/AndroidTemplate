@@ -7,9 +7,9 @@
 
     <com.tjw.selectimage.album.widget.PaddingTopFrameLayout
         android:id="@+id/paddinglayout"
-        android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
@@ -32,18 +32,12 @@
     </com.tjw.selectimage.album.widget.PaddingTopFrameLayout>
 
     <FrameLayout
-        android:layout_below="@+id/paddinglayout"
         android:id="@+id/nonVideoLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_above="@+id/ll_comment"
+        android:layout_below="@+id/paddinglayout">
 
-
-        <com.tjw.template.widget.webview.VideoEnabledWebView
-            android:id="@+id/webView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </com.tjw.template.widget.webview.VideoEnabledWebView>
 
         <ProgressBar
             android:id="@+id/pb_loading"
@@ -52,17 +46,58 @@
             android:layout_height="2dp"
             android:progressDrawable="@drawable/progress_webview"/>
 
+        <com.tjw.template.widget.webview.VideoEnabledWebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </com.tjw.template.widget.webview.VideoEnabledWebView>
+
 
     </FrameLayout>
 
+
+    <LinearLayout
+        android:id="@+id/ll_comment"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/drawable_comment_ll_bg"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:background="@drawable/drawable_comment_tv_bg"
+            android:drawableLeft="@drawable/ic_mode_edit_black_24dp"
+            android:drawablePadding="10dp"
+            android:drawableStart="@drawable/ic_mode_edit_black_24dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="写评论"
+            android:textColor="#000"
+            android:textSize="16dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_android_black_24dp"/>
+
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/videoLayout"
-        android:visibility="gone"
-        android:background="#000000"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone">
 
-        
+
     </FrameLayout>
 
 

@@ -8,7 +8,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.models.Image;
 import com.tjw.selectimage.photoview.OnPhotoTapListener;
 import com.tjw.selectimage.photoview.PhotoView;
@@ -67,10 +69,16 @@ public class ImagePreviewAdapter extends PagerAdapter {
             L.w("load gif => " + imgPath);
             Glide.with(context)
                     .load(imgPath)
+                    .placeholder(R.drawable.image_placeholder)
+                    .dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .into(new GlideDrawableImageViewTarget(image, 0));
         } else {
             Glide.with(context)
                     .load(imgPath)
+                    .placeholder(R.drawable.image_placeholder)
+                    .crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
                     .into(image);
         }

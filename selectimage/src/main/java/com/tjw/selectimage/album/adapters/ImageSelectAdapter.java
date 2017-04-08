@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.tjw.selectimage.R;
 import com.tjw.selectimage.album.models.Image;
@@ -54,18 +55,23 @@ public class ImageSelectAdapter extends CustomGenericAdapter<Image> {
             Glide.with(context)
                     .load(arrayList.get(position).path)
                     .placeholder(R.drawable.image_placeholder)
+                    .dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .into(new GlideDrawableImageViewTarget(viewHolder.imageView, 0));
         } else {
             Glide.with(context)
                     .load(arrayList.get(position).path)
-                    .placeholder(R.drawable.image_placeholder).into(viewHolder.imageView);
+                    .placeholder(R.drawable.image_placeholder)
+                    .crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(viewHolder.imageView);
         }
         
         return convertView;
     }
     
     private static class ViewHolder {
-        public ImageView imageView;
-        public View view;
+        ImageView imageView;
+        private View view;
     }
 }
