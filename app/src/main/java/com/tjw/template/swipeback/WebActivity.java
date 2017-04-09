@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -14,10 +15,15 @@ import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.tjw.selectimage.uitl.L;
 import com.tjw.template.R;
+import com.tjw.template.util.KeyboardUtil;
+import com.tjw.template.util.ToastUtils;
+import com.tjw.template.widget.MyBottomSheetDialog;
 import com.tjw.template.widget.webview.VideoEnabledWebChromeClient;
 import com.tjw.template.widget.webview.VideoEnabledWebView;
 
@@ -34,6 +40,8 @@ public class WebActivity extends BaseSwipeBackActivity {
     private VideoEnabledWebChromeClient mWebChromeClient;
     private int mCurrentProgress;
     private boolean isAnimStart;
+    private TextView mTvComment;
+    private EditText mEtComment;
     
     @Override
     protected void initView() {
@@ -41,6 +49,8 @@ public class WebActivity extends BaseSwipeBackActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mWebView = (VideoEnabledWebView) findViewById(R.id.webView);
         mProgressBar = (ProgressBar) findViewById(R.id.pb_loading);
+        mTvComment = (TextView) findViewById(R.id.tv_comment_start);
+        
         setToolbar(mToolbar);
         setWebView();
     }
@@ -48,6 +58,63 @@ public class WebActivity extends BaseSwipeBackActivity {
     @Override
     protected void loadData() {
         mWebView.loadUrl("http://s4.uczzd.cn/ucnews/news?app=ucnews-iflow&aid=16871624809867081690");
+    }
+    
+    @Override
+    protected void setListener() {
+        mTvComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCommentDialog();
+            }
+        });
+    }
+    
+    private void showCommentDialog() {
+        final MyBottomSheetDialog bottomSheetDialog = new MyBottomSheetDialog(this, R.style.Dialog_Comment);
+
+//        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        
+        bottomSheetDialog.setContentView(R.layout.dialog_comment_web);
+        mEtComment = (EditText) bottomSheetDialog.findViewById(R.id.et_comment_edit);
+        
+        bottomSheetDialog.show();
+        KeyboardUtil.openKeyboard(this, mEtComment);
+        bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                ToastUtils.show(WebActivity.this, "评论框关闭了");
+//                KeyboardUtil.closeKeyboard(WebActivity.this);
+            }
+        });
+        
+       
+    
+        /*bottomSheetDialog.findViewById(R.id.tv_select_image_cancel)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        bottomSheetDialog.cancel();
+                    }
+                });
+    
+        bottomSheetDialog.findViewById(R.id.tv_select_image_album)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        bottomSheetDialog.cancel();
+                    }
+                });
+    
+        bottomSheetDialog.findViewById(R.id.tv_select_image_camera)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        bottomSheetDialog.cancel();
+                    }
+                });*/
+        
+        
     }
     
     private void setWebView() {

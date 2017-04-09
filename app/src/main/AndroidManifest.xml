@@ -72,10 +72,11 @@
 
         <activity
             android:name=".swipeback.WebActivity"
-            android:hardwareAccelerated="true"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.SwipeBack"/>
+            android:theme="@style/AppTheme.SwipeBack"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
 
     </application>
 
