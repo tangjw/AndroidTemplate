@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +23,6 @@ import android.widget.TextView;
 
 import com.tjw.selectimage.uitl.L;
 import com.tjw.template.R;
-import com.tjw.template.util.KeyboardUtil;
 import com.tjw.template.util.ToastUtils;
 import com.tjw.template.widget.MyBottomSheetDialog;
 import com.tjw.template.widget.webview.VideoEnabledWebChromeClient;
@@ -42,6 +43,12 @@ public class WebActivity extends BaseSwipeBackActivity {
     private boolean isAnimStart;
     private TextView mTvComment;
     private EditText mEtComment;
+    private KeyMapDailog dialog;
+    
+    @Override
+    protected void beforeSuperCreate(@Nullable Bundle savedInstanceState) {
+        super.beforeSuperCreate(savedInstanceState);
+    }
     
     @Override
     protected void initView() {
@@ -66,6 +73,22 @@ public class WebActivity extends BaseSwipeBackActivity {
             @Override
             public void onClick(View v) {
                 showCommentDialog();
+
+//                dialog = new KeyMapDailog("回复小明：", new KeyMapDailog.SendBackListener() {
+//                    @Override
+//                    public void sendBack(final String inputText) {
+//                        new Handler().postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                dialog.hideProgressdialog();
+//                                
+//                                dialog.dismiss();
+//                            }
+//                        }, 2000);
+//                    }
+//                });
+//    
+//                dialog.show(getSupportFragmentManager(), "dialog");
             }
         });
     }
@@ -73,47 +96,17 @@ public class WebActivity extends BaseSwipeBackActivity {
     private void showCommentDialog() {
         final MyBottomSheetDialog bottomSheetDialog = new MyBottomSheetDialog(this, R.style.Dialog_Comment);
 
-//        bottomSheetDialog.setCanceledOnTouchOutside(false);
-        
         bottomSheetDialog.setContentView(R.layout.dialog_comment_web);
         mEtComment = (EditText) bottomSheetDialog.findViewById(R.id.et_comment_edit);
         
         bottomSheetDialog.show();
-        KeyboardUtil.openKeyboard(this, mEtComment);
+    
         bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 ToastUtils.show(WebActivity.this, "评论框关闭了");
-//                KeyboardUtil.closeKeyboard(WebActivity.this);
             }
         });
-        
-       
-    
-        /*bottomSheetDialog.findViewById(R.id.tv_select_image_cancel)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.cancel();
-                    }
-                });
-    
-        bottomSheetDialog.findViewById(R.id.tv_select_image_album)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.cancel();
-                    }
-                });
-    
-        bottomSheetDialog.findViewById(R.id.tv_select_image_camera)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        bottomSheetDialog.cancel();
-                    }
-                });*/
-        
         
     }
     

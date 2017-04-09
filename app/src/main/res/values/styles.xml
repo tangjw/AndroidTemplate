@@ -41,5 +41,8 @@
     <style name="Dialog.Comment" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:backgroundDimAmount">0.0</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Toast</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowSoftInputMode">stateAlwaysVisible</item><!--显示软件盘-->
     </style>
 </resources>
