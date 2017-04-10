@@ -77,6 +77,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.SwipeBack"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
+        
+        <activity
+            android:name=".springanimation.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.SwipeBack"/>
 
     </application>
 

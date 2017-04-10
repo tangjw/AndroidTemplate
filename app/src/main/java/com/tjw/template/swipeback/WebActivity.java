@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -21,10 +20,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.tjw.selectimage.uitl.L;
 import com.tjw.template.R;
-import com.tjw.template.util.ToastUtils;
-import com.tjw.template.widget.MyBottomSheetDialog;
 import com.tjw.template.widget.webview.VideoEnabledWebChromeClient;
 import com.tjw.template.widget.webview.VideoEnabledWebView;
 
@@ -43,7 +39,6 @@ public class WebActivity extends BaseSwipeBackActivity {
     private boolean isAnimStart;
     private TextView mTvComment;
     private EditText mEtComment;
-    private KeyMapDailog dialog;
     
     @Override
     protected void beforeSuperCreate(@Nullable Bundle savedInstanceState) {
@@ -73,41 +68,13 @@ public class WebActivity extends BaseSwipeBackActivity {
             @Override
             public void onClick(View v) {
                 showCommentDialog();
-
-//                dialog = new KeyMapDailog("回复小明：", new KeyMapDailog.SendBackListener() {
-//                    @Override
-//                    public void sendBack(final String inputText) {
-//                        new Handler().postDelayed(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                dialog.hideProgressdialog();
-//                                
-//                                dialog.dismiss();
-//                            }
-//                        }, 2000);
-//                    }
-//                });
-//    
-//                dialog.show(getSupportFragmentManager(), "dialog");
             }
         });
     }
     
     private void showCommentDialog() {
-        final MyBottomSheetDialog bottomSheetDialog = new MyBottomSheetDialog(this, R.style.Dialog_Comment);
-
-        bottomSheetDialog.setContentView(R.layout.dialog_comment_web);
-        mEtComment = (EditText) bottomSheetDialog.findViewById(R.id.et_comment_edit);
-        
-        bottomSheetDialog.show();
-    
-        bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                ToastUtils.show(WebActivity.this, "评论框关闭了");
-            }
-        });
-        
+        CommentDialog commentDialog = CommentDialog.newInstance();
+        commentDialog.show(getSupportFragmentManager(), "dialog_comment");
     }
     
     private void setWebView() {
@@ -122,8 +89,6 @@ public class WebActivity extends BaseSwipeBackActivity {
             
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                
-                L.i("newProgress => " + newProgress);
                 
                 mCurrentProgress = mProgressBar.getProgress();
                 if (newProgress >= 61 && !isAnimStart) {

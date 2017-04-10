@@ -10,7 +10,7 @@
     <item
         android:top="1px">
         <shape>
-            <solid android:color="#FFF"/>
+            <solid android:color="#f4f1f1"/>
         </shape>
     </item>
 </layer-list>

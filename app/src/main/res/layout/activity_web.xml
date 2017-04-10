@@ -39,19 +39,19 @@
         android:layout_below="@+id/paddinglayout">
 
 
-        <ProgressBar
-            android:id="@+id/pb_loading"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:progressDrawable="@drawable/progress_webview"/>
-
         <com.tjw.template.widget.webview.VideoEnabledWebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
         </com.tjw.template.widget.webview.VideoEnabledWebView>
+
+        <ProgressBar
+            android:id="@+id/pb_loading"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:progressDrawable="@drawable/progress_webview"/>
 
 
     </FrameLayout>

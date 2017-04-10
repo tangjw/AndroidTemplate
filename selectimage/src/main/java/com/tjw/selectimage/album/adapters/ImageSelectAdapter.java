@@ -3,6 +3,7 @@ package com.tjw.selectimage.album.adapters;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -44,11 +45,11 @@ public class ImageSelectAdapter extends CustomGenericAdapter<Image> {
         
         if (arrayList.get(position).isSelected) {
             viewHolder.view.setAlpha(0.5f);
-            convertView.setForeground(context.getResources().getDrawable(R.drawable.ic_done_white));
+            ((FrameLayout) convertView).setForeground(context.getResources().getDrawable(R.drawable.ic_done_white));
             
         } else {
             viewHolder.view.setAlpha(0.0f);
-            convertView.setForeground(null);
+            ((FrameLayout) convertView).setForeground(null);
         }
         
         if (arrayList.get(position).path.endsWith(".gif") || arrayList.get(position).path.contains(".gif")) {

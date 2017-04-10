@@ -1,6 +1,7 @@
 package com.tjw.template.swipeback.main.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.tjw.template.R;
 import com.tjw.template.bean.Repo;
+import com.tjw.template.springanimation.MainActivity;
 import com.tjw.template.widget.banner.HeaderView;
 
 import java.util.List;
@@ -58,6 +60,13 @@ public class Main1RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
         }
         View inflate = LayoutInflater.from(mActivity).inflate(R.layout.item_main_1, parent, false);
     
+        inflate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mActivity.startActivity(new Intent(mActivity, MainActivity.class));
+            }
+        });
+        
         return new ItemVH(inflate);
     }
     
