@@ -21,3 +21,22 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.2"
+    minSdkVersion = 16
+    targetSdkVersion = 25
+}
+
+ext {
+    local = 'Hello from build.gradle'
+}
+task printProperties << {
+    println local        // Local extra property
+    println propertiesFile   // Property from file
+//    if (project.hasProperty('cmd')) {
+//        println cmd        // Command line property
+//    }
+}
+

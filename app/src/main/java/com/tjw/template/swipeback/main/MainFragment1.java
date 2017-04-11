@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.tjw.template.BuildConfig;
 import com.tjw.template.R;
 import com.tjw.template.bean.Repo;
 import com.tjw.template.bottomnav.BaseFragment;
@@ -88,9 +89,10 @@ public class MainFragment1 extends BaseFragment {
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
         logInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         builder.addInterceptor(logInterceptor);
+        String temp = getString(R.string.app_name1);
         
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.github.com/")
+                .baseUrl(BuildConfig.API_HOST)
                 .client(builder.build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

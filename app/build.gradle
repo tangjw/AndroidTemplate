@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.tjw.template"
-        minSdkVersion 16
-        targetSdkVersion 25
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -15,9 +15,37 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name1", "TempRelease"
+        }
+        debug {
+            minifyEnabled false
+            buildConfigField "String", "API_HOST", "\"https://api.github.com/\""
+            buildConfigField "boolean", "LOG_ENABLE", "true"
+            resValue "string", "app_name1", "TempDebug"
+        }
+        staging {
+            initWith(buildTypes.debug)
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-staging'
+            resValue "string", "app_name1", "TempStaging"
         }
     }
 }
+
+/*android {
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest.setRoot('tests')
+    }
+}*/
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')

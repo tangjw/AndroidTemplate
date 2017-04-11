@@ -17,6 +17,8 @@ public class TemplateApp extends Application {
         super.onCreate();
         
         initLogger();
+
+//        OpenInstall.init(this);
         
     }
     
