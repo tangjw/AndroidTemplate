@@ -54,6 +54,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
+    compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
     compile 'com.android.support:support-dynamic-animation:25.3.1'
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
     compile 'io.reactivex.rxjava2:rxjava:2.0.6'
@@ -65,4 +66,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':selectimage')
     compile project(':swipeback')
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
 }

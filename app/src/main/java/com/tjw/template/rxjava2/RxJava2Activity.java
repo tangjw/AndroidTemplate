@@ -8,9 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.tjw.selectimage.uitl.L;
 import com.tjw.template.R;
 import com.tjw.template.bean.Repo;
 import com.tjw.template.net.GitHubApi;
+import com.tjw.template.net.HttpMethods;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +46,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RxJava2Activity extends AppCompatActivity {
     
+    private static final java.lang.String TAG = "RxJava2Activity";
     private Button mButton2;
     private long mTimeMillis0;
     
@@ -238,6 +241,17 @@ public class RxJava2Activity extends AppCompatActivity {
     
     
     public void click2(View view) {
+        HttpMethods.getInstance()
+                .getRepos("tangjw", new Consumer<List<Repo>>() {
+                    @Override
+                    public void accept(@NonNull List<Repo> repos) throws Exception {
+                        L.i(TAG, "结果 => " + repos.size());
+                    }
+                
+                });
+    }
+    
+    public void click3(View view) {
        /* Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
             public void subscribe(ObservableEmitter<Integer> e) throws Exception {
@@ -311,11 +325,11 @@ public class RxJava2Activity extends AppCompatActivity {
                         mButton2.setText("RxJava2线程切换(" + integer + ")");
                     }
                 }); */
-    
+        
         OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
         builder.readTimeout(10L, TimeUnit.SECONDS);
         builder.connectTimeout(15L, TimeUnit.SECONDS);
-    
+        
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
         logInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         builder.addInterceptor(logInterceptor);

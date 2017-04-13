@@ -1,5 +1,6 @@
 package com.tjw.template.swipeback;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
@@ -46,7 +47,9 @@ public abstract class BaseSwipeBackActivity extends AppCompatActivity implements
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(getSwipeBackContainer());
-        mSwipeBackLayout.addView(LayoutInflater.from(this).inflate(layoutResID, null));
+        View inflate = LayoutInflater.from(this).inflate(layoutResID, null);
+        inflate.setBackgroundColor(Color.WHITE);
+        mSwipeBackLayout.addView(inflate);
     }
     
     private View getSwipeBackContainer() {

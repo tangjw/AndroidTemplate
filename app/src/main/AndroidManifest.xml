@@ -71,6 +71,14 @@
         </activity>
 
         <activity
+            android:name=".rxjava2.RxTextViewActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.SwipeBack">
+
+        </activity>
+
+        <activity
             android:name=".swipeback.WebActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:hardwareAccelerated="true"

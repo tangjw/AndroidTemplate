@@ -8,6 +8,7 @@ import android.view.View;
 import com.tjw.template.R;
 import com.tjw.template.bottomnav.BaseFragment;
 import com.tjw.template.camera.CameraActivity2;
+import com.tjw.template.rxjava2.RxJava2Activity;
 
 /**
  * ^-^
@@ -40,6 +41,13 @@ public class MainFragment3 extends BaseFragment {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(mActivity, CameraActivity2.class));
+            }
+        });
+    
+        mRootView.findViewById(R.id.button6).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, RxJava2Activity.class));
             }
         });
     }

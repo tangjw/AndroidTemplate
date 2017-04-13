@@ -2,18 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:background="#300F"
               android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"/>
+        android:padding="10dp"
+        android:layout_gravity="center_horizontal"
+        android:text="RxTextView"/>
 
-    <Button
-        android:id="@+id/button6"
+    <EditText
+        android:id="@+id/et_search_keyword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button"/>
+        android:hint="输入关键词, 自动搜索"/>
+
+    <TextView
+        android:id="@+id/tv_search_keyword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="结果"/>
+
 </LinearLayout>
