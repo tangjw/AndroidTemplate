@@ -30,6 +30,11 @@ android {
             resValue "string", "app_name1", "TempStaging"
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDir('libs')
+        }
+    }
 }
 
 /*android {
