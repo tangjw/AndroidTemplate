@@ -33,6 +33,13 @@
             android:name=".swipeback.SplashActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
+        <activity
+            android:name=".mvp.demo.MyGitRepoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -95,7 +102,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.SwipeBack"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
-        
+
         <activity
             android:name=".springanimation.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
