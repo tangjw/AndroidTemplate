@@ -20,6 +20,7 @@ public class MyGitRepoPresenter implements MyGitRepoContract.Presenter {
     
     public MyGitRepoPresenter(MyGitRepoContract.View view) {
         mView = view;
+        mView.setPresenter(this);
     }
     
     @Override
@@ -33,7 +34,7 @@ public class MyGitRepoPresenter implements MyGitRepoContract.Presenter {
     }
     
     @Override
-    public void getRepos(String username) {
+    public void getRepos(@NonNull String username) {
         HttpMethods.getInstance().getRepos(username, new Consumer<List<Repo>>() {
             @Override
             public void accept(@NonNull List<Repo> repos) throws Exception {

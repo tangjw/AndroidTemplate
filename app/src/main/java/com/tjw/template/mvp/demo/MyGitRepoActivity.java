@@ -39,7 +39,7 @@ public class MyGitRepoActivity extends AppCompatActivity implements MyGitRepoCon
         initRecyclerView();
         mImageView = (ImageView) findViewById(R.id.iv_empty);
     
-        setPresenter(new MyGitRepoPresenter(this));
+        MyGitRepoPresenter presenter = new MyGitRepoPresenter(this);
     
         mPresenter.getRepos("tangjw");
     }
