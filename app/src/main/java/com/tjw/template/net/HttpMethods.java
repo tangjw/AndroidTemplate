@@ -64,6 +64,7 @@ public class HttpMethods {
         return sInstance;
     }
     
+    
     public void getRepos(String username, Consumer<List<Repo>> consumer) {
         mGitHubApi.getRepos(username)
                 .subscribeOn(Schedulers.io())

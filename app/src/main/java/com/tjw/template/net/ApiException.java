@@ -7,18 +7,18 @@ package com.tjw.template.net;
 
 public class ApiException extends Exception {
     
-    private static String getMessage(int code, String message) {
-        if (message == null) throw new NullPointerException("message == null");
-        return "HTTP " + code + " " + message;
-    }
-    
     private final int code;
     private final String message;
-    
     
     public ApiException(int code, String message) {
         super(getMessage(code, message));
         this.code = code;
         this.message = message;
+    }
+    
+    
+    private static String getMessage(int code, String message) {
+        if (message == null) throw new NullPointerException("message == null");
+        return "HTTP " + code + " " + message;
     }
 }
