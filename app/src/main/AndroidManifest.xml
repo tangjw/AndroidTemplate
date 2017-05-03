@@ -33,18 +33,18 @@
             android:name=".swipeback.SplashActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
 
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
 
         <activity
             android:name=".mvp.demo.MyGitRepoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize">
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
 
@@ -89,6 +89,14 @@
 
         <activity
             android:name=".rxjava2.RxTextViewActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.SwipeBack">
+
+        </activity>
+
+        <activity
+            android:name=".swipeback.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.SwipeBack">

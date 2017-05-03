@@ -9,6 +9,7 @@ import com.tjw.template.R;
 import com.tjw.template.bottomnav.BaseFragment;
 import com.tjw.template.camera.CameraActivity2;
 import com.tjw.template.rxjava2.RxTextViewActivity;
+import com.tjw.template.swipeback.LoginActivity;
 
 /**
  * ^-^
@@ -48,6 +49,13 @@ public class MainFragment3 extends BaseFragment {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(mActivity, RxTextViewActivity.class));
+            }
+        });
+    
+        mRootView.findViewById(R.id.button7).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, LoginActivity.class));
             }
         });
     }
