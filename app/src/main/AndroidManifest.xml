@@ -55,6 +55,12 @@
 
         </activity>
         <activity
+            android:name=".login.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+        <activity
             android:name=".ScrollingActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_scrolling"
@@ -113,6 +119,12 @@
 
         <activity
             android:name=".springanimation.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.SwipeBack"/>
+
+        <activity
+            android:name=".avatar.AvatarActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.SwipeBack"/>

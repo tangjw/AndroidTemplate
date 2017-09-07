@@ -180,7 +180,6 @@ public class SelectImageImpl implements SelectImage {
         switch (requestCode) {
             case TConstant.RC_PICK_PICTURE_FROM_CAPTURE:
                 if (resultCode == Activity.RESULT_OK) {
-                    // TODO: 3/26 旋转图片 三星问题 
                     /*if (takePhotoOptions != null && takePhotoOptions.isCorrectImage())
                         ImageRotateUtil.of().correctImage(contextWrap.getActivity(), outPutUri);*/
                     try {

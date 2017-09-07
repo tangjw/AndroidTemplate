@@ -19,7 +19,7 @@ public class TemplateApp extends Application {
         super.onCreate();
         
         initLogger();
-        initJPush();
+//        initJPush();
 
 //        OpenInstall.init(this);
         

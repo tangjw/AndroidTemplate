@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.tjw.template.R;
+import com.tjw.template.avatar.AvatarActivity;
 import com.tjw.template.bottomnav.BaseFragment;
 import com.tjw.template.camera.CameraActivity2;
 import com.tjw.template.rxjava2.RxTextViewActivity;
@@ -44,18 +45,24 @@ public class MainFragment3 extends BaseFragment {
                 startActivity(new Intent(mActivity, CameraActivity2.class));
             }
         });
-    
+        
         mRootView.findViewById(R.id.button6).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(mActivity, RxTextViewActivity.class));
             }
         });
-    
+        
         mRootView.findViewById(R.id.button7).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(mActivity, LoginActivity.class));
+            }
+        });
+        mRootView.findViewById(R.id.button8).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mActivity, AvatarActivity.class));
             }
         });
     }

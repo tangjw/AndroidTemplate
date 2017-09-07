@@ -10,6 +10,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
+        
     }
     buildTypes {
         release {
@@ -72,4 +77,17 @@ dependencies {
     compile project(':selectimage')
     compile project(':swipeback')
     compile 'com.squareup.retrofit2:converter-gson:2.2.0'
+
+
+    // 基础功能 (必需)
+    compile 'com.netease.nimlib:basesdk:3.3.0'
+    // 音视频需要
+    compile 'com.netease.nimlib:avchat:3.3.0'
+    // 聊天室需要
+//    compile 'com.netease.nimlib:chatroom:3.3.0'
+    // 实时会话服务需要
+    compile 'com.netease.nimlib:rts:3.3.0'
+    // 全文检索服务需要
+//    compile 'com.netease.nimlib:lucene:3.3.0'
+    
 }
